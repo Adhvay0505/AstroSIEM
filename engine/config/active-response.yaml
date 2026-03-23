@@ -1,0 +1,5 @@
+responses:
+  - name: critical-posture-log
+    type: log
+    min_severity: critical
+    output_file: processed-data/active-response.log

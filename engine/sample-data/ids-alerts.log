@@ -1,0 +1,16 @@
+# Sample IDS Alerts for AstroSIEM Testing
+# Format: [IDS] <Suricata/Snort alert line>
+
+[IDS] 02/20/2026-10:15:23.000000  [1:1000001:1] ET SCAN Potential SSH Scan [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.100:45678 -> 10.0.0.5:22
+[IDS] 02/20/2026-10:15:24.000000  [1:1000001:1] ET SCAN Potential SSH Scan [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.100:45679 -> 10.0.0.5:22
+[IDS] 02/20/2026-10:15:25.000000  [1:1000001:1] ET SCAN Potential SSH Scan [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.100:45680 -> 10.0.0.5:22
+[IDS] 02/20/2026-10:16:00.000000  [1:2000010:1] ET EXPLOIT Buffer Overflow Attempt [Classification: Attempted Administrator Privilege Gain] [Priority: 1] {TCP} 203.0.113.50:4444 -> 10.0.0.5:80
+[IDS] 02/20/2026-10:16:30.000000  [1:1000010:1] ET MALWARE Ransomware/MegaCortex Traffic [Classification: A Network Trojan was detected] [Priority: 1] {TCP} 198.51.100.25:443 -> 10.0.0.5:8080
+[IDS] 02/20/2026-10:17:00.000000  [1:1000002:1] ET SCAN Nmap XMAS [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.100:12345 -> 10.0.0.5:1
+[IDS] 02/20/2026-10:17:30.000000  [1:1000003:1] ET SCAN SQL Injection Attempt [Classification: Attempted User Privilege Gain] [Priority: 1] {TCP} 203.0.113.50:54321 -> 10.0.0.5:443
+[IDS] 02/20/2026-10:18:00.000000  [1:1000004:1] ET WEB_ATTACK XSS Attempt [Classification: Cross Site Scripting] [Priority: 2] {TCP} 198.51.100.25:55555 -> 10.0.0.5:80
+[IDS] 02/20/2026-10:18:30.000000  [1:1000005:1] ET SHELLCODE x86 inc ebx NOPS [Classification: Executable Code was Detected] [Priority: 1] {TCP} 192.168.1.100:4444 -> 10.0.0.5:22
+[IDS] 02/20/2026-10:19:00.000000  [1:1000006:1] ET DDOS DDoS Attack Detected [Classification: Denial of Service] [Priority: 1] {TCP} 45.33.32.156:80 -> 10.0.0.5:443
+[IDS] 02/20/2026-10:19:30.000000  [1:1000007:1] ET BRUTE FORCE SSH Authentication Failed [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.100:40000 -> 10.0.0.5:22
+[IDS] 02/20/2026-10:20:00.000000  [1:1000008:1] ET DNS Tunneling DNS Query to Suspicious Domain [Classification: Potential Corporate Policy Violation] [Priority: 2] {UDP} 10.0.0.5:12345 -> 8.8.8.8:53
+[IDS] 02/20/2026-10:20:30.000000  [1:1000009:1] ET POLICY Suspicious User-Agent [Classification: Potentially Bad Traffic] [Priority: 3] {TCP} 203.0.113.50:60000 -> 10.0.0.5:8080

@@ -1,0 +1,115 @@
+[
+  {
+    "technique_id": "T1110.001",
+    "technique_name": "Password Guessing",
+    "tactic": "Credential Access",
+    "description": "Brute-force or one-time password attempts.",
+    "keywords": ["Failed password", "authentication failure", "invalid user", "login failed"]
+  },
+  {
+    "technique_id": "T1110.003",
+    "technique_name": "Password Spraying",
+    "tactic": "Credential Access",
+    "description": "Attempting common passwords across many accounts.",
+    "keywords": ["multiple failed password attempts", "authentication error"]
+  },
+  {
+    "technique_id": "T1078",
+    "technique_name": "Valid Accounts",
+    "tactic": "Initial Access",
+    "description": "Successful login via valid credentials.",
+    "keywords": ["Accepted password", "session opened for user", "login accepted", "user logged in"]
+  },
+  {
+    "technique_id": "T1136",
+    "technique_name": "Create Account",
+    "tactic": "Persistence",
+    "description": "New user account created on the system.",
+    "keywords": ["useradd", "adduser", "new user", "created user", "user added"]
+  },
+  {
+    "technique_id": "T1036",
+    "technique_name": "Masquerading",
+    "tactic": "Defense Evasion",
+    "description": "Use of sudo/su to assume another user’s identity.",
+    "keywords": ["sudo", "su root", "switched user"]
+  },
+  {
+    "technique_id": "T1055",
+    "technique_name": "Process Injection",
+    "tactic": "Defense Evasion",
+    "description": "Malicious manipulation of auth mechanisms or PAM.",
+    "keywords": ["pam_unix", "pam_tally2", "authentication failed"]
+  },
+  {
+    "technique_id": "T1021.001",
+    "technique_name": "Remote Services: SSH",
+    "tactic": "Lateral Movement",
+    "description": "Login via SSH protocol.",
+    "keywords": ["ssh connection", "ssh login", "ssh session", "session opened via ssh"]
+  },
+  {
+    "technique_id": "T1548.003",
+    "technique_name": "Sudo and Sudo Caching",
+    "tactic": "Privilege Escalation",
+    "description": "Use of sudo to execute commands as root.",
+    "keywords": ["sudo:", "sudo session", "sudo command"]
+  },
+  {
+    "technique_id": "T1059.004",
+    "technique_name": "Command and Scripting Interpreter: Unix Shell",
+    "tactic": "Execution",
+    "description": "Execution via bash, sh, zsh or other Unix shells.",
+    "keywords": ["bash", "sh", "zsh", "python", "perl", "ruby"]
+  },
+  {
+    "technique_id": "T1087",
+    "technique_name": "Account Discovery",
+    "tactic": "Discovery",
+    "description": "Attempting to enumerate user accounts and groups.",
+    "keywords": ["whoami", "id", "groups", "getent passwd", "cat /etc/passwd", "cat /etc/group"]
+  },
+  {
+    "technique_id": "T1083",
+    "technique_name": "File and Directory Discovery",
+    "tactic": "Discovery",
+    "description": "Searching for sensitive files and directories.",
+    "keywords": ["ls -la", "find /", "locate", "tree", "cat /etc/shadow", "cat /etc/sudoers"]
+  },
+  {
+    "technique_id": "T1614",
+    "technique_name": "Location Tracking",
+    "tactic": "Discovery",
+    "description": "Discovering user login history and current sessions.",
+    "keywords": ["last", "lastlog", "who", "w", "finger"]
+  },
+  {
+    "technique_id": "T1071",
+    "technique_name": "Application Layer Protocol",
+    "tactic": "Command and Control",
+    "description": "Using standard protocols for C2 communication or data transfer.",
+    "keywords": ["curl", "wget", "nc", "ncat", "telnet"]
+  },
+  {
+    "technique_id": "T1567",
+    "technique_name": "Exfiltration Over Web Service",
+    "tactic": "Exfiltration",
+    "description": "Transferring data via web protocols.",
+    "keywords": ["scp", "sftp", "rsync", "ftp"]
+  },
+  {
+    "technique_id": "T1070",
+    "technique_name": "Indicator Removal",
+    "tactic": "Defense Evasion",
+    "description": "Attempting to clear logs or remove evidence of activity.",
+    "keywords": ["history -c", "rm -rf /var/log", "echo '' > /var/log", "> /var/log"]
+  },
+  {
+    "technique_id": "T1203",
+    "technique_name": "Exploitation for Client Execution",
+    "tactic": "Execution",
+    "description": "Potential RCE attempts if seen in logs.",
+    "keywords": ["remote code execution", "rce attempt"]
+  }
+]
+

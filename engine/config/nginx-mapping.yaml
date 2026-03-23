@@ -1,0 +1,111 @@
+# AstroSIEM Nginx Log Mapping Configuration
+# Maps Nginx log patterns to MITRE techniques and compliance frameworks
+
+# Nginx access log patterns
+access_patterns:
+  - pattern: "(?i)(union.*select|select.*from|insert.*into)"
+    description: "SQL Injection Attempt"
+    mitre: "T1190"
+    severity: "critical"
+    
+  - pattern: "(?i)(<script|javascript:|onerror=|onload=)"
+    description: "Cross-Site Scripting Attempt"
+    mitre: "T1189"
+    severity: "high"
+    
+  - pattern: "/etc/passwd"
+    description: "Path Traversal Attempt"
+    mitre: "T1083"
+    severity: "high"
+    
+  - pattern: "(?i)(wget|curl|nc|bash|sh)"
+    description: "Command Injection Attempt"
+    mitre: "T1059"
+    severity: "critical"
+    
+  - pattern: "(?i)(cmd.php|c99|r57|wso|webshell|backdoor)"
+    description: "Web Shell Access Attempt"
+    mitre: "T1505"
+    severity: "critical"
+    
+  - pattern: "(?i)(/admin|/wp-admin|/phpmyadmin)"
+    description: "Admin Panel Access"
+    mitre: "T1078"
+    severity: "medium"
+    
+  - pattern: ".env"
+    description: "Configuration File Access"
+    mitre: "T1082"
+    severity: "high"
+    
+  - pattern: " 401 | 403 |failed login"
+    description: "Authentication Failure"
+    mitre: "T1110"
+    severity: "medium"
+    
+  - pattern: "(?i)(nikto|sqlmap|masscan|gobuster|ffuf)"
+    description: "Security Scanner Detected"
+    mitre: "T1046"
+    severity: "high"
+    
+  - pattern: " 429 |upstream timed out|too many connections"
+    description: "DoS/Resource Exhaustion"
+    mitre: "T1498"
+    severity: "high"
+
+# Nginx error log patterns
+error_patterns:
+  - pattern: "connect.*failed|Connection refused"
+    description: "Upstream Connection Failure"
+    mitre: "T1498"
+    severity: "medium"
+    
+  - pattern: "no live upstreams"
+    description: "All Upstreams Dead - DoS"
+    mitre: "T1498"
+    severity: "high"
+    
+  - pattern: "client intended to send too large body"
+    description: "Request Size Limit Exceeded"
+    mitre: "T1498"
+    severity: "medium"
+    
+  - pattern: "limiting connections|limit_req"
+    description: "Rate Limiting Active"
+    mitre: "T1498"
+    severity: "low"
+
+# Compliance mappings
+compliance_mapping:
+  pci_dss:
+    - "T1190"
+    - "T1110"
+    - "T1505"
+    - "T1083"
+    - "T1498"
+    
+  gdpr:
+    - "T1190"
+    - "T1110"
+    - "T1505"
+    
+  hipaa:
+    - "T1190"
+    - "T1110"
+    - "T1505"
+    
+  soc2:
+    - "T1190"
+    - "T1110"
+    - "T1046"
+    
+  nist:
+    - "T1190"
+    - "T1110"
+    - "T1498"
+    - "T1083"
+    
+  iso_27001:
+    - "T1190"
+    - "T1110"
+    - "T1505"

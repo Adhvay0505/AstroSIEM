@@ -1,0 +1,315 @@
+rules:
+  - id: ASTRO-DET-1001
+    title: External SSH brute-force activity
+    type: threshold
+    severity: critical
+    confidence: 92
+    description: Detect repeated external authentication failures against the same host.
+    source: security
+    match:
+      event.category: authentication
+      event.action:
+        in:
+          - login_failed
+          - invalid_user
+      source.ip:
+        not_private: true
+    group_by:
+      - source.ip
+      - host.name
+    threshold: 8
+    window_minutes: 30
+    summary_template: "{count} failed authentication events from {source.ip} against {host.name} within {window_minutes} minutes."
+    recommendations:
+      - Block or rate-limit the source IP at the perimeter.
+      - Review SSH hardening and disable password authentication where possible.
+      - Investigate whether any successful login followed these failures.
+
+  - id: ASTRO-DET-1002
+    title: Invalid user enumeration against SSH
+    type: threshold
+    severity: high
+    confidence: 84
+    description: Detect attackers cycling through usernames from the same external IP.
+    source: security
+    match:
+      event.category: authentication
+      event.action: invalid_user
+      source.ip:
+        not_private: true
+    group_by:
+      - source.ip
+      - host.name
+    threshold: 5
+    window_minutes: 60
+    distinct_field: user.name
+    summary_template: "{count} invalid-user probes from {source.ip} against {host.name}, covering {distinct_count} distinct usernames."
+    recommendations:
+      - Check for exposed services that allow username discovery.
+      - Add IP-based blocking or tarpitting for repeated invalid-user attempts.
+      - Review usernames targeted to identify privileged or sensitive accounts.
+
+  - id: ASTRO-DET-1003
+    title: Repeated privileged sudo sessions
+    type: event_group
+    severity: medium
+    confidence: 68
+    description: Surface repeated privileged sudo access for analyst review.
+    source: security
+    match:
+      event.category: privilege
+      event.action: sudo_session_opened
+    group_by:
+      - host.name
+      - user.name
+    summary_template: "Privileged sudo activity observed on {host.name} for user {user.name}."
+    recommendations:
+      - Validate whether the sudo activity aligns with approved administrative work.
+      - Review commands executed after session open events.
+
+  - id: ASTRO-DET-2001
+    title: Network intrusion burst from a single source
+    type: threshold
+    severity: critical
+    confidence: 88
+    description: Detect multiple high-severity IDS or firewall indicators from the same source.
+    source: network
+    match:
+      event.category: network
+      event.severity_score:
+        gte: 70
+      source.ip:
+        exists: true
+    group_by:
+      - source.ip
+      - destination.ip
+    threshold: 2
+    window_minutes: 60
+    summary_template: "{count} high-severity network detections from {source.ip} towards {destination.ip}."
+    recommendations:
+      - Investigate whether the destination host was exposed during the time window.
+      - Pivot on the source IP across web, auth, and endpoint telemetry.
+      - Consider blocking the source at network controls if activity is malicious.
+
+  - id: ASTRO-DET-3001
+    title: Web exploitation or web shell indicator
+    type: event_group
+    severity: critical
+    confidence: 90
+    description: Detect web-tier events consistent with code execution, scanners, or exploitation.
+    source: web
+    match:
+      event.category: web
+      event.action:
+        in:
+          - web_rce_indicator
+          - scanner_activity
+          - web_exploit_attempt
+      event.severity_score:
+        gte: 60
+    group_by:
+      - host.name
+      - source.ip
+    summary_template: "Suspicious web activity on {host.name} associated with {source.ip}."
+    recommendations:
+      - Inspect the requested URIs and affected application files for tampering.
+      - Review web server and application logs around the alert window.
+      - Quarantine exposed web content if code execution is confirmed.
+
+  - id: ASTRO-DET-4001
+    title: Container privilege escalation indicator
+    type: event_group
+    severity: critical
+    confidence: 86
+    description: Detect Docker events consistent with host escape or privileged abuse.
+    source: docker
+    match:
+      event.category: container
+      event.action:
+        in:
+          - docker_socket_access
+          - host_mount
+          - sensitive_file_access
+      event.severity_score:
+        gte: 70
+    group_by:
+      - host.name
+      - container.name
+    summary_template: "Container abuse indicators observed on {host.name} for {container.name}."
+    recommendations:
+      - Inspect the container runtime configuration for privileged flags and host mounts.
+      - Check whether the container accessed sensitive host resources.
+      - Rotate secrets accessible to the affected container if compromise is suspected.
+
+  - id: ASTRO-DET-5001
+    title: Kubernetes identity abuse
+    type: event_group
+    severity: critical
+    confidence: 89
+    description: Detect identity misuse or interactive access within Kubernetes.
+    source: kubernetes
+    match:
+      event.category: kubernetes
+      event.action:
+        in:
+          - service_account_impersonation
+          - unauthorized_k8s_access
+          - interactive_shell
+          - secrets_access
+    group_by:
+      - host.name
+      - kubernetes.namespace
+      - user.name
+    summary_template: "Kubernetes identity abuse indicators observed on {host.name} in namespace {kubernetes.namespace}."
+    recommendations:
+      - Review RBAC bindings and recent cluster-admin activity.
+      - Inspect the affected namespace for modified workloads or secret access.
+      - Revoke compromised service account tokens if misuse is confirmed.
+
+  - id: ASTRO-DET-6001
+    title: Sensitive file integrity change
+    type: event_group
+    severity: high
+    confidence: 78
+    description: Detect FIM activity under sensitive paths.
+    source: fim
+    match:
+      event.category: file
+      event.action:
+        in:
+          - file_created
+          - file_modified
+          - file_deleted
+      file.path:
+        regex: "^/(etc|root|var/www)"
+    group_by:
+      - host.name
+      - file.path
+    summary_template: "Sensitive file integrity change detected on {host.name}: {file.path}."
+    recommendations:
+      - Validate the change against approved deployment or admin activity.
+      - Compare old and new file hashes where available.
+      - Investigate adjacent auth or process telemetry for compromise signs.
+
+  - id: ASTRO-DET-7001
+    title: Cross-surface attacker overlap
+    type: distinct
+    severity: critical
+    confidence: 94
+    description: Detect the same external IP appearing across multiple telemetry surfaces.
+    source: multi
+    match:
+      source.ip:
+        not_private: true
+    group_by:
+      - source.ip
+    distinct_field: telemetry.source
+    threshold: 2
+    window_minutes: 1440
+    summary_template: "{source.ip} triggered activity across {distinct_count} telemetry sources in the last {window_minutes} minutes."
+    recommendations:
+      - Treat the IP as a high-priority pivot across all available telemetry.
+      - Correlate web, auth, and network evidence to determine attack progression.
+      - Add the indicator to temporary blocklists while investigation continues.
+
+  - id: ASTRO-SEQ-1001
+    title: Authentication compromise after repeated failures
+    type: sequence
+    severity: critical
+    confidence: 96
+    description: Detect successful authentication shortly after a burst of failures on the same host and user.
+    source: security
+    group_by:
+      - host.name
+      - user.name
+    window_minutes: 45
+    steps:
+      - label: repeated login failures
+        min_count: 5
+        match:
+          event.category: authentication
+          event.action:
+            in:
+              - login_failed
+              - invalid_user
+      - label: successful login
+        min_count: 1
+        match:
+          event.category: authentication
+          event.action: login_success
+    summary_template: "Repeated authentication failures were followed by a successful login for user {user.name} on {host.name}."
+    recommendations:
+      - Treat the login as potentially compromised until verified.
+      - Review source IPs tied to preceding failures and the successful session.
+      - Check for privilege escalation or lateral movement after the login.
+
+  - id: ASTRO-SEQ-2001
+    title: Network intrusion followed by web exploitation
+    type: sequence
+    severity: critical
+    confidence: 90
+    description: Detect the same source progressing from network detections into suspicious web activity.
+    source: multi
+    group_by:
+      - source.ip
+    window_minutes: 180
+    steps:
+      - label: network intrusion indicator
+        min_count: 1
+        match:
+          telemetry.source: network
+          event.category: network
+          event.severity_score:
+            gte: 70
+          source.ip:
+            exists: true
+      - label: suspicious web activity
+        min_count: 1
+        match:
+          event.category: web
+          event.action:
+            in:
+              - web_rce_indicator
+              - scanner_activity
+              - web_exploit_attempt
+          source.ip:
+            exists: true
+    summary_template: "{source.ip} progressed from network intrusion indicators to suspicious web activity within {window_minutes} minutes."
+    recommendations:
+      - Prioritize the source IP for containment and retrospective hunting.
+      - Review affected web assets for exploitation or web shell activity.
+      - Confirm whether the same IP targeted additional hosts or services.
+
+  - id: ASTRO-SEQ-3001
+    title: Container abuse followed by Kubernetes identity activity
+    type: sequence
+    severity: high
+    confidence: 82
+    description: Detect suspicious container activity preceding Kubernetes identity misuse on the same host.
+    source: multi
+    group_by:
+      - host.name
+    window_minutes: 240
+    steps:
+      - label: container abuse indicator
+        min_count: 1
+        match:
+          telemetry.source: docker
+          event.category: container
+          event.severity_score:
+            gte: 70
+      - label: kubernetes identity abuse
+        min_count: 1
+        match:
+          telemetry.source: kubernetes
+          event.category: kubernetes
+          event.action:
+            in:
+              - service_account_impersonation
+              - unauthorized_k8s_access
+              - secrets_access
+    summary_template: "Container abuse was followed by Kubernetes identity activity on {host.name}."
+    recommendations:
+      - Review whether the container had access to cluster credentials or service account tokens.
+      - Inspect cluster RBAC and recent pod exec activity on the affected host.
+      - Rotate exposed secrets and credentials if compromise is suspected.

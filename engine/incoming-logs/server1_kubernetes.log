@@ -1,0 +1,16 @@
+# Sample Kubernetes Logs for AstroSIEM Testing
+
+[K8S_AUDIT] [20/Feb/2026:10:15:23] user=admin verb=create resource=pods namespace=default reason="escalate privilege"
+[K8S_AUDIT] [20/Feb/2026:10:16:00] user=service-account verb=get resource=secrets namespace=kube-system reason="unauthorized access denied"
+[K8S_AUDIT] [20/Feb/2026:10:17:00] user=kube-proxy verb=list resource=configmaps namespace=default denied="forbidden"
+[K8S_AUDIT] [20/Feb/2026:10:18:00] user=anonymous verb=impersonate resource=serviceaccounts namespace=default reason="as=system:admin"
+[K8S_AUDIT] [20/Feb/2026:10:19:00] user=admin verb=delete resource=networkpolicies namespace=default
+[K8S_POD] namespace=default pod=web-app-xyz123 [20/Feb/2026:10:20:00] Interactive shell detected: /bin/bash -i
+[K8S_POD] namespace=default pod=app-xyz456 [20/Feb/2026:10:21:00] Crypto mining detected: kube-miner process
+[K8S_POD] namespace=default pod=api-xyz789 [20/Feb/2026:10:22:00] Suspicious DNS query to external IP: 8.8.8.8
+[K8S_POD] namespace=kube-system pod=kube-proxy-abc [20/Feb/2026:10:23:00] Pod created in kube-system namespace
+[K8S_EVENT] namespace=default reason=FailedScheduling pod=worker-xyz message="0/3 nodes are available: 3 Insufficient cpu"
+[K8S_EVENT] namespace=default reason=BackOff pod=web-app message="Back-off restarting failed container"
+[K8S_LOG] source=kubelet [20/Feb/2026:10:15:00] Failed to pull image "untrusted:latest"
+[K8S_LOG] source=apiserver [20/Feb/2026:10:24:00] authorization denied: user=anonymous, verb=get, resource=pods
+[K8S_AUDIT] [20/Feb/2026:10:25:00] user=admin verb=approve resource=certificatesigningrequests csr=signed-client-cert

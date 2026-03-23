@@ -1,0 +1,146 @@
+# AstroSIEM Kubernetes Log Mapping Configuration
+# Maps K8s log patterns to MITRE techniques and compliance frameworks
+
+# Kubernetes audit patterns
+audit_patterns:
+  # Privilege escalation
+  - pattern: "(?i)(escalate.*privilege|bind.*system:admin|cluster-admin|rolebinding)"
+    description: "Privilege Escalation in K8s"
+    mitre: "T1068"  # Exploitation for Privilege Escalation
+    severity: "critical"
+    
+  # Unauthorized access
+  - pattern: "(?i)(unauthorized|forbidden|access denied|denied.*create|denied.*update)"
+    description: "Unauthorized K8s Access"
+    mitre: "T1078"  # Valid Accounts
+    severity: "high"
+    
+  # Secret access
+  - pattern: "(?i)(get.*secret|list.*secret|secrets\\.k8s\\.io|service-account-token)"
+    description: "Kubernetes Secret Access"
+    mitre: "T1082"  # System Information Discovery
+    severity: "high"
+    
+  # ConfigMap access
+  - pattern: "(?i)(get.*configmap|list.*configmap|cm\\.k8s\\.io)"
+    description: "Kubernetes ConfigMap Access"
+    mitre: "T1082"
+    severity: "medium"
+    
+  # Service account abuse
+  - pattern: "(?i)(serviceaccount|impersonat|as=.*system:)"
+    description: "Service Account Impersonation"
+    mitre: "T1078"
+    severity: "critical"
+    
+  # Network policy change
+  - pattern: "(?i)(networkpolicies.*create|networkpolicies.*update|delete.*networkpolicy)"
+    description: "Network Policy Modification"
+    mitre: "T1565"  # Data Manipulation
+    severity: "high"
+    
+  # Pod creation in kube-system
+  - pattern: "(?i)(create.*pod.*kube-system|kube-system.*namespace)"
+    description: "Suspicious Pod in kube-system"
+    mitre: "T1068"
+    severity: "critical"
+    
+  # Horizontal pod autoscaler changes
+  - pattern: "(?i)(horizontalpodautoscaler|hpa.*update|scale.*replicas)"
+    description: "HPA Modification"
+    mitre: "T1496"  # Resource Hijacking
+    severity: "medium"
+    
+  # Certificate signing request
+  - pattern: "(?i)(certificatesigningrequest|csr.*approve|sign.*certificate)"
+    description: "Certificate Signing Request"
+    mitre: "T1190"  # Exploit Public-Facing Application
+    severity: "high"
+    
+  # Node manipulation
+  - pattern: "(?i)(node.*create|node.*delete|drain.*node|kubelet.*update)"
+    description: "Node Manipulation"
+    mitre: "T1068"
+    severity: "critical"
+
+# Kubernetes component log patterns
+component_patterns:
+  # API server errors
+  - pattern: "(?i)(apiserver.*error|unauthorized.*request|403.*forbidden)"
+    description: "API Server Access Error"
+    mitre: "T1078"
+    severity: "high"
+    
+  # Kubelet issues
+  - pattern: "(?i)(kubelet.*failed|pod.* evicted|OOMKilled|ImagePullBackOff)"
+    description: "Kubelet/Pod Issue"
+    mitre: "T1496"
+    severity: "medium"
+    
+  # Etcd issues
+  - pattern: "(?i)(etcd.*error|etcd.*leader|raft.*error)"
+    description: "Etcd Cluster Issue"
+    mitre: "T1498"
+    severity: "high"
+    
+  # Scheduler issues
+  - pattern: "(?i)(scheduler.*failed|failed.*schedule|unschedulable)"
+    description: "Scheduler Failure"
+    mitre: "T1498"
+    severity: "medium"
+
+# Pod log security patterns
+pod_patterns:
+  # Shell in container
+  - pattern: "(?i)(sh -i|bash -i|/bin/sh|/bin/bash)"
+    description: "Interactive Shell in Pod"
+    mitre: "T1059"
+    severity: "high"
+    
+  # Crypto mining in pod
+  - pattern: "(?i)(xmrig|minerd|cryptonight|kube miner|kube-bot)"
+    description: "Crypto Mining in Pod"
+    mitre: "T1496"
+    severity: "critical"
+    
+  # Suspicious network from pod
+  - pattern: "(?i)(suspicious network|dns.*tunnel|stratum\\+tcp|external.*connection)"
+    description: "Suspicious Network from Pod"
+    mitre: "T1041"
+    severity: "high"
+
+# Compliance mappings
+compliance_mapping:
+  pci_dss:
+    - "T1068"  # Privilege escalation
+    - "T1078"  # Unauthorized access
+    - "T1041"  # Exfiltration
+    - "T1496"  # Resource hijacking
+    - "T1190"  # Exploits
+    
+  gdpr:
+    - "T1041"  # Data exfiltration
+    - "T1078"  # Unauthorized access
+    - "T1082"  # Data discovery
+    
+  hipaa:
+    - "T1041"  # PHI exfiltration
+    - "T1068"  # Privilege escalation
+    - "T1078"  # Unauthorized access
+    
+  soc2:
+    - "T1068"  # Privilege escalation
+    - "T1078"  # Unauthorized access
+    - "T1496"  # Resource hijacking
+    
+  nist:
+    - "T1068"  # Privilege escalation
+    - "T1078"  # Unauthorized access
+    - "T1498"  # DoS
+    - "T1041"  # Exfiltration
+    
+  iso_27001:
+    - "T1068"  # Privilege escalation
+    - "T1078"  # Unauthorized access
+    - "T1041"  # Exfiltration
+    - "T1082"  # Data discovery

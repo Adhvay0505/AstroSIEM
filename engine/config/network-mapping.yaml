@@ -1,0 +1,157 @@
+# AstroSIEM Network Log Mapping Configuration
+# Maps network log patterns to MITRE techniques and compliance frameworks
+
+# Firewall log patterns - maps to MITRE techniques and compliance
+firewall_patterns:
+  # SSH brute force attempts
+  - pattern: "BLOCK.*DPT=22"
+    description: "SSH port blocked"
+    mitre: "T1110"  # Password Guessing
+    severity: "high"
+    
+  # SMB/Windows file sharing blocked
+  - pattern: "BLOCK.*DPT=445"
+    description: "SMB port blocked"
+    mitre: "T1021"  # Remote Services
+    severity: "medium"
+    
+  # FTP blocked
+  - pattern: "BLOCK.*DPT=21"
+    description: "FTP port blocked"
+    mitre: "T1071"  # Application Layer Protocol
+    severity: "medium"
+    
+  # Telnet blocked
+  - pattern: "BLOCK.*DPT=23"
+    description: "Telnet port blocked"
+    mitre: "T1059"  # Command and Scripting Interpreter
+    severity: "high"
+    
+  # Database ports blocked
+  - pattern: "BLOCK.*DPT=(3306|5432|1433|27017)"
+    description: "Database port blocked"
+    mitre: "T1041"  # Exfiltration
+    severity: "high"
+    
+  # DNS blocked (potential exfiltration)
+  - pattern: "BLOCK.*DPT=53"
+    description: "DNS port blocked"
+    mitre: "T1041"  # Exfiltration
+    severity: "medium"
+    
+  # HTTP/HTTPS blocked
+  - pattern: "BLOCK.*DPT=(80|443)"
+    description: "Web port blocked"
+    mitre: "T1071"  # Application Layer Protocol
+    severity: "low"
+    
+  # ICMP (ping) sweep
+  - pattern: "BLOCK.*PROTO=ICMP"
+    description: "ICMP blocked"
+    mitre: "T1082"  # System Information Discovery
+    severity: "low"
+
+# IDS/IPS alert patterns
+ids_patterns:
+  # Port scan detection
+  - pattern: "PORTSCAN|Port Scan"
+    description: "Port scan detected"
+    mitre: "T1046"  # Network Service Discovery
+    severity: "high"
+    
+  # SSH scan
+  - pattern: "SSH Scan|SCAN SSH"
+    description: "SSH scanning detected"
+    mitre: "T1110"  # Password Guessing
+    severity: "high"
+    
+  # Brute force
+  - pattern: "BRUTE FORCE|Brute Force"
+    description: "Brute force attack detected"
+    mitre: "T1110"  # Password Guessing
+    severity: "critical"
+    
+  # SQL injection
+  - pattern: "SQL INJECTION|SQLi"
+    description: "SQL injection attempt"
+    mitre: "T1190"  # Exploit Public-Facing Application
+    severity: "critical"
+    
+  # XSS attack
+  - pattern: "XSS|Cross-Site Scripting"
+    description: "XSS attack detected"
+    mitre: "T1189"  # Drive-by Compromise
+    severity: "high"
+    
+  # Shellcode
+  - pattern: "SHELLCODE|Shellcode"
+    description: "Shellcode detected"
+    mitre: "T1055"  # Process Injection
+    severity: "critical"
+    
+  # Buffer overflow
+  - pattern: "BUFFER OVERFLOW|BUFFER OVERFLOW ATTEMPT"
+    description: "Buffer overflow attempt"
+    mitre: "T1190"  # Exploit Public-Facing Application
+    severity: "critical"
+    
+  # Malware
+  - pattern: "MALWARE|ET MALWARE|TROJAN"
+    description: "Malware detected"
+    mitre: "T1566"  # Phishing
+    severity: "critical"
+    
+  # DDoS
+  - pattern: "DDOS|DDoS|DENIAL OF SERVICE"
+    description: "Denial of service detected"
+    mitre: "T1498"  # Denial of Service
+    severity: "high"
+    
+  # DNS tunneling
+  - pattern: "DNS TUNNEL|DNSTUNNEL"
+    description: "DNS tunneling detected"
+    mitre: "T1041"  # Exfiltration
+    severity: "high"
+
+# Compliance mappings for network events
+compliance_mapping:
+  # PCI-DSS violations
+  pci_dss:
+    - "T1110"  # Brute force
+    - "T1046"  # Port scanning
+    - "T1190"  # Exploit public app (web attacks)
+    - "T1041"  # Exfiltration
+    - "T1566"  # Phishing/Malware
+    
+  # GDPR violations
+  gdpr:
+    - "T1110"  # Unauthorized access attempt
+    - "T1041"  # Data exfiltration
+    - "T1566"  # Malware
+    - "T1190"  # Web attacks
+    
+  # HIPAA violations
+  hipaa:
+    - "T1110"  # Unauthorized access
+    - "T1041"  # Data exfiltration
+    - "T1190"  # Healthcare app attacks
+    
+  # SOC 2 violations
+  soc2:
+    - "T1110"  # Brute force
+    - "T1046"  # Port scanning
+    - "T1041"  # Exfiltration
+    - "T1190"  # Application exploits
+    
+  # NIST violations
+  nist:
+    - "T1110"  # Brute force
+    - "T1046"  # Network discovery
+    - "T1190"  # Exploits
+    - "T1498"  # DoS
+    
+  # ISO 27001 violations
+  iso_27001:
+    - "T1110"  # Brute force
+    - "T1041"  # Exfiltration
+    - "T1190"  # Security incidents

@@ -1,0 +1,652 @@
+{
+  "events": [
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.521064",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "10.0.0.5",
+      "destination_ip": "8.8.8.8",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "DNS tunneling detected",
+      "mitre": [
+        {
+          "technique_id": "T1041",
+          "technique_name": "T1041"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "ISO_27001"
+      ],
+      "raw_log": "02/20/2026-10:20:00.000000  [1:1000008:1] ET DNS Tunneling DNS Query to Suspicious Domain [Classification: Potential Corporate Policy Violation] [Priority: 2] {UDP} 10.0.0.5:12345 -> 8.8.8.8:53"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.520992",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "Brute force attack detected",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "02/20/2026-10:19:30.000000  [1:1000007:1] ET BRUTE FORCE SSH Authentication Failed [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.100:40000 -> 10.0.0.5:22"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.520961",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "45.33.32.156",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "Denial of service detected",
+      "mitre": [
+        {
+          "technique_id": "T1498",
+          "technique_name": "T1498"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "NIST"
+      ],
+      "raw_log": "02/20/2026-10:19:00.000000  [1:1000006:1] ET DDOS DDoS Attack Detected [Classification: Denial of Service] [Priority: 1] {TCP} 45.33.32.156:80 -> 10.0.0.5:443"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.520901",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "Shellcode detected",
+      "mitre": [
+        {
+          "technique_id": "T1055",
+          "technique_name": "T1055"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [],
+      "raw_log": "02/20/2026-10:18:30.000000  [1:1000005:1] ET SHELLCODE x86 inc ebx NOPS [Classification: Executable Code was Detected] [Priority: 1] {TCP} 192.168.1.100:4444 -> 10.0.0.5:22"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.520853",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "198.51.100.25",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "XSS attack detected",
+      "mitre": [
+        {
+          "technique_id": "T1189",
+          "technique_name": "T1189"
+        }
+      ],
+      "severity": "high",
+      "compliance": [],
+      "raw_log": "02/20/2026-10:18:00.000000  [1:1000004:1] ET WEB_ATTACK XSS Attempt [Classification: Cross Site Scripting] [Priority: 2] {TCP} 198.51.100.25:55555 -> 10.0.0.5:80"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.520811",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "203.0.113.50",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "SQL injection attempt",
+      "mitre": [
+        {
+          "technique_id": "T1190",
+          "technique_name": "T1190"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "02/20/2026-10:17:30.000000  [1:1000003:1] ET SCAN SQL Injection Attempt [Classification: Attempted User Privilege Gain] [Priority: 1] {TCP} 203.0.113.50:54321 -> 10.0.0.5:443"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.520531",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "198.51.100.25",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "Malware detected",
+      "mitre": [
+        {
+          "technique_id": "T1566",
+          "technique_name": "T1566"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR"
+      ],
+      "raw_log": "02/20/2026-10:16:30.000000  [1:1000010:1] ET MALWARE Ransomware/MegaCortex Traffic [Classification: A Network Trojan was detected] [Priority: 1] {TCP} 198.51.100.25:443 -> 10.0.0.5:8080"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.520380",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "203.0.113.50",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "Buffer overflow attempt",
+      "mitre": [
+        {
+          "technique_id": "T1190",
+          "technique_name": "T1190"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "02/20/2026-10:16:00.000000  [1:2000010:1] ET EXPLOIT Buffer Overflow Attempt [Classification: Attempted Administrator Privilege Gain] [Priority: 1] {TCP} 203.0.113.50:4444 -> 10.0.0.5:80"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519896",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "SSH scanning detected",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "02/20/2026-10:15:25.000000  [1:1000001:1] ET SCAN Potential SSH Scan [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.100:45680 -> 10.0.0.5:22"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519866",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "SSH scanning detected",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "02/20/2026-10:15:24.000000  [1:1000001:1] ET SCAN Potential SSH Scan [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.100:45679 -> 10.0.0.5:22"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519830",
+      "hostname": "server1",
+      "log_type": "ids",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "alert",
+      "description": "SSH scanning detected",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "02/20/2026-10:15:23.000000  [1:1000001:1] ET SCAN Potential SSH Scan [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.1.100:45678 -> 10.0.0.5:22"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519599",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "45.33.32.156",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 27017,
+      "action": "block",
+      "description": "Database port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1041",
+          "technique_name": "T1041"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "ISO_27001"
+      ],
+      "raw_log": "Feb 20 10:20:00 server1 kernel: iptables: BLOCK TCP by 0.0.0.0/0 SRC=45.33.32.156 DST=10.0.0.5 DPT=27017"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519567",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "198.51.100.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 23,
+      "action": "block",
+      "description": "Telnet port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1059",
+          "technique_name": "T1059"
+        }
+      ],
+      "severity": "high",
+      "compliance": [],
+      "raw_log": "Feb 20 10:19:30 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=198.51.100.100 DST=10.0.0.5 PROTO=TCP DPT=23"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519527",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 5432,
+      "action": "block",
+      "description": "Database port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1041",
+          "technique_name": "T1041"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "ISO_27001"
+      ],
+      "raw_log": "Feb 20 10:19:00 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.168.1.100 DST=10.0.0.5 PROTO=TCP DPT=5432"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519495",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "203.0.113.75",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 21,
+      "action": "block",
+      "description": "FTP port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1071",
+          "technique_name": "T1071"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [],
+      "raw_log": "Feb 20 10:18:30 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.75 DST=10.0.0.5 PROTO=TCP DPT=21"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519467",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": null,
+      "action": "block",
+      "description": "ICMP blocked",
+      "mitre": [
+        {
+          "technique_id": "T1082",
+          "technique_name": "T1082"
+        }
+      ],
+      "severity": "low",
+      "compliance": [],
+      "raw_log": "Feb 20 10:18:00 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.168.1.100 DST=10.0.0.5 PROTO=ICMP"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519356",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "198.51.100.25",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 1433,
+      "action": "block",
+      "description": "Database port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1041",
+          "technique_name": "T1041"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "ISO_27001"
+      ],
+      "raw_log": "Feb 20 10:17:30 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=198.51.100.25 DST=10.0.0.5 PROTO=TCP DPT=1433"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519324",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 3306,
+      "action": "block",
+      "description": "Database port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1041",
+          "technique_name": "T1041"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "ISO_27001"
+      ],
+      "raw_log": "Feb 20 10:17:00 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.168.1.100 DST=10.0.0.5 PROTO=TCP DPT=3306"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519291",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "203.0.113.50",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 443,
+      "action": "block",
+      "description": "Web port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1071",
+          "technique_name": "T1071"
+        }
+      ],
+      "severity": "low",
+      "compliance": [],
+      "raw_log": "Feb 20 10:16:10 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.50 DST=10.0.0.5 PROTO=TCP DPT=443"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519247",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "203.0.113.50",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 80,
+      "action": "block",
+      "description": "Web port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1071",
+          "technique_name": "T1071"
+        }
+      ],
+      "severity": "low",
+      "compliance": [],
+      "raw_log": "Feb 20 10:16:05 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=203.0.113.50 DST=10.0.0.5 PROTO=TCP DPT=80"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.519111",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "10.0.0.50",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 53,
+      "action": "block",
+      "description": "DNS port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1041",
+          "technique_name": "T1041"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "ISO_27001"
+      ],
+      "raw_log": "Feb 20 10:16:01 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=10.0.0.50 DST=10.0.0.5 PROTO=UDP DPT=53"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.518787",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 445,
+      "action": "block",
+      "description": "SMB port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1021",
+          "technique_name": "T1021"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [],
+      "raw_log": "Feb 20 10:15:26 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.168.1.100 DST=10.0.0.5 PROTO=TCP DPT=445"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.518699",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 22,
+      "action": "block",
+      "description": "SSH port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "Feb 20 10:15:25 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.168.1.100 DST=10.0.0.5 PROTO=TCP DPT=22"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.518678",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 22,
+      "action": "block",
+      "description": "SSH port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "Feb 20 10:15:24 server1 kernel: [UFW BLOCK] IN=eth0 OUT= SRC=192.168.1.100 DST=10.0.0.5 PROTO=TCP DPT=22"
+    },
+    {
+      "timestamp_utc": "2026-02-23T14:40:55.518632",
+      "hostname": "server1",
+      "log_type": "firewall",
+      "source_ip": "192.168.1.100",
+      "destination_ip": "10.0.0.5",
+      "source_port": null,
+      "destination_port": 22,
+      "action": "block",
+      "description": "SSH port blocked",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "Feb 20 10:15:23 server1 kernel: [UFW BLOCK] IN=eth0 OUT= MAC=00:11:22:33:44:55 SRC=192.168.1.100 DST=10.0.0.5 PROTO=TCP DPT=22"
+    }
+  ],
+  "statistics": {
+    "total_events": 25,
+    "by_type": {
+      "ids": 11,
+      "firewall": 14
+    },
+    "by_severity": {
+      "high": 14,
+      "critical": 5,
+      "medium": 3,
+      "low": 3
+    },
+    "by_compliance": {
+      "PCI_DSS": 16,
+      "GDPR": 16,
+      "HIPAA": 15,
+      "SOC2": 15,
+      "ISO_27001": 15,
+      "NIST": 10
+    },
+    "top_attackers": {
+      "10.0.0.5": 1,
+      "192.168.1.100": 12,
+      "45.33.32.156": 2,
+      "198.51.100.25": 3,
+      "203.0.113.50": 4,
+      "198.51.100.100": 1,
+      "203.0.113.75": 1,
+      "10.0.0.50": 1
+    },
+    "top_ports": {
+      "27017": 1,
+      "23": 1,
+      "5432": 1,
+      "21": 1,
+      "1433": 1,
+      "3306": 1,
+      "443": 1,
+      "80": 1,
+      "53": 1,
+      "445": 1,
+      "22": 3
+    }
+  }
+}

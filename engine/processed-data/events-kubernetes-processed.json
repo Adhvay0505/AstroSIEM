@@ -1,0 +1,158 @@
+{
+  "events": [
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.561179",
+      "hostname": "server1",
+      "log_type": "k8s_audit",
+      "namespace": "default",
+      "pod_name": "unknown",
+      "description": "Certificate Signing Request",
+      "mitre": [
+        {
+          "technique_id": "T1190",
+          "technique_name": "T1190"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS"
+      ],
+      "raw_log": "[20/Feb/2026:10:25:00] user=admin verb=approve resource=certificatesigningrequests csr=signed-client-cert"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.560473",
+      "hostname": "server1",
+      "log_type": "k8s_pod",
+      "namespace": "default",
+      "pod_name": "web-app-xyz123",
+      "description": "Interactive Shell in Pod",
+      "mitre": [
+        {
+          "technique_id": "T1059",
+          "technique_name": "T1059"
+        }
+      ],
+      "severity": "high",
+      "compliance": [],
+      "raw_log": "namespace=default pod=web-app-xyz123 [20/Feb/2026:10:20:00] Interactive shell detected: /bin/bash -i"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.558809",
+      "hostname": "server1",
+      "log_type": "k8s_audit",
+      "namespace": "default",
+      "pod_name": "unknown",
+      "description": "Service Account Impersonation",
+      "mitre": [
+        {
+          "technique_id": "T1078",
+          "technique_name": "T1078"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "[20/Feb/2026:10:18:00] user=anonymous verb=impersonate resource=serviceaccounts namespace=default reason=\"as=system:admin\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.558204",
+      "hostname": "server1",
+      "log_type": "k8s_audit",
+      "namespace": "default",
+      "pod_name": "unknown",
+      "description": "Unauthorized K8s Access",
+      "mitre": [
+        {
+          "technique_id": "T1078",
+          "technique_name": "T1078"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "[20/Feb/2026:10:17:00] user=kube-proxy verb=list resource=configmaps namespace=default denied=\"forbidden\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.558159",
+      "hostname": "server1",
+      "log_type": "k8s_audit",
+      "namespace": "kube-system",
+      "pod_name": "unknown",
+      "description": "Unauthorized K8s Access",
+      "mitre": [
+        {
+          "technique_id": "T1078",
+          "technique_name": "T1078"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "[20/Feb/2026:10:16:00] user=service-account verb=get resource=secrets namespace=kube-system reason=\"unauthorized access denied\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.557826",
+      "hostname": "server1",
+      "log_type": "k8s_audit",
+      "namespace": "default",
+      "pod_name": "unknown",
+      "description": "Privilege Escalation in K8s",
+      "mitre": [
+        {
+          "technique_id": "T1068",
+          "technique_name": "T1068"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "[20/Feb/2026:10:15:23] user=admin verb=create resource=pods namespace=default reason=\"escalate privilege\""
+    }
+  ],
+  "statistics": {
+    "total_events": 6,
+    "by_type": {
+      "k8s_audit": 5,
+      "k8s_pod": 1
+    },
+    "by_severity": {
+      "high": 4,
+      "critical": 2
+    },
+    "by_compliance": {
+      "PCI_DSS": 5,
+      "GDPR": 3,
+      "HIPAA": 4,
+      "SOC2": 4,
+      "NIST": 4,
+      "ISO_27001": 4
+    },
+    "top_namespaces": {
+      "default": 5,
+      "kube-system": 1
+    }
+  }
+}

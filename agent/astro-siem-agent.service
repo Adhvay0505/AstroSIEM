@@ -1,0 +1,10 @@
+[Unit]
+Description=AstroSIEM Unified Agent - Log Exporter
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/astro-siem/agent/agent-http-server.sh
+User=root
+StandardOutput=journal
+StandardError=journal

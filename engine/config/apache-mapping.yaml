@@ -1,0 +1,106 @@
+# AstroSIEM Apache Log Mapping Configuration
+# Maps Apache log patterns to MITRE techniques and compliance frameworks
+
+# Apache access log patterns
+access_patterns:
+  - pattern: "(?i)(union.*select|select.*from|insert.*into)"
+    description: "SQL Injection Attempt"
+    mitre: "T1190"
+    severity: "critical"
+    
+  - pattern: "(?i)(<script|javascript:|onerror=|onload=)"
+    description: "Cross-Site Scripting Attempt"
+    mitre: "T1189"
+    severity: "high"
+    
+  - pattern: "/etc/passwd|/etc/shadow"
+    description: "Path Traversal Attempt"
+    mitre: "T1083"
+    severity: "high"
+    
+  - pattern: "(?i)(;.*wget|;.*curl|;.*nc|bash.*sh)"
+    description: "Command Injection Attempt"
+    mitre: "T1059"
+    severity: "critical"
+    
+  - pattern: "(?i)(php://|data://|http://|https://)"
+    description: "Remote File Inclusion Attempt"
+    mitre: "T1190"
+    severity: "critical"
+    
+  - pattern: "(?i)(/.git/|/.env|/wp-content/|/phpmyadmin/)"
+    description: "Directory/File Enumeration"
+    mitre: "T1083"
+    severity: "medium"
+    
+  - pattern: "(?i)(nmap|masscan|nikto|dirbuster|sqlmap)"
+    description: "Security Scanner Detected"
+    mitre: "T1046"
+    severity: "high"
+    
+  - pattern: " 401 | 403 |authentication failure"
+    description: "Authentication Failure"
+    mitre: "T1110"
+    severity: "medium"
+    
+  - pattern: " 429 |Too Many Requests"
+    description: "Rate Limiting Triggered"
+    mitre: "T1498"
+    severity: "medium"
+
+# Apache error log patterns
+error_patterns:
+  - pattern: "PHP Fatal error|PHP Warning.*eval"
+    description: "PHP Code Execution Attempt"
+    mitre: "T1505"
+    severity: "critical"
+    
+  - pattern: "client denied by server configuration"
+    description: "Access Denied by Configuration"
+    mitre: "T1083"
+    severity: "low"
+    
+  - pattern: "Timeout waiting for output from CGI"
+    description: "CGI Timeout - Possible Backdoor"
+    mitre: "T1505"
+    severity: "medium"
+    
+  - pattern: "File does not exist.*php"
+    description: "Missing PHP File - Scanner Activity"
+    mitre: "T1083"
+    severity: "low"
+
+# Compliance mappings
+compliance_mapping:
+  pci_dss:
+    - "T1190"
+    - "T1110"
+    - "T1505"
+    - "T1083"
+    - "T1498"
+    
+  gdpr:
+    - "T1190"
+    - "T1110"
+    - "T1505"
+    
+  hipaa:
+    - "T1190"
+    - "T1110"
+    - "T1505"
+    
+  soc2:
+    - "T1190"
+    - "T1110"
+    - "T1046"
+    
+  nist:
+    - "T1190"
+    - "T1110"
+    - "T1498"
+    - "T1083"
+    
+  iso_27001:
+    - "T1190"
+    - "T1110"
+    - "T1505"

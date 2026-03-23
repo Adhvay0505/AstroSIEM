@@ -1,0 +1,57 @@
+# AstroSIEM Agent Configuration
+# =============================
+# Configuration for unified agents
+# Each agent runs the unified agent that auto-discovers log sources
+#
+# To add a new agent:
+# 1. Install the unified agent on the target system:
+#    sudo /path/to/AstroSIEM/agent/install.sh
+# 2. Add the agent IP below with a descriptive name
+# 3. Run the collector: ./collect-logs.sh
+#
+# Notes:
+# - Only hosts listed under `agents:` are treated as managed AstroSIEM agents.
+# - The server running the WebUI is not treated as an agent unless you install
+#   the agent on it and add it below like any other endpoint.
+
+agents:
+  endpoint1:
+    # First agent endpoint
+    # CHANGE THIS: Set to your agent VM IP address
+    ip: 192.168.122.100
+    description: "Primary monitoring endpoint"
+    # Optional: define the expected policy baseline for this agent.
+    # policy_baseline:
+    #   expected_services:
+    #     - name: sshd.service
+    #       enabled_state: enabled
+    #       active_state: active
+    #     - name: firewalld.service
+    #       enabled_state: enabled
+    #       active_state: active
+    #   expected_configs:
+    #     ssh_permit_root_login: no
+    #     ssh_password_authentication: no
+    #     firewall_status:
+    #       - running
+    #       - active
+    
+  endpoint2:
+    # Second agent endpoint (optional)
+    # CHANGE THIS: Set to your second agent VM IP address
+    ip: 192.168.122.63
+    description: "Secondary monitoring endpoint"
+    
+  # Add more agents as needed:
+  # endpoint3:
+  #   ip: 192.168.122.105
+  #   description: "Third monitoring endpoint"
+
+settings:
+  # Global settings applied to all agents
+  logs_dir: logs
+  incoming_dir: incoming-logs
+  protocol: http
+  default_port: 80
+  timeout: 30  # connection timeout in seconds
+  export_path: log_export/latest  # Unified agent export path

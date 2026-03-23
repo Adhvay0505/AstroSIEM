@@ -1,0 +1,106 @@
+# AstroSIEM Docker Log Mapping Configuration
+# Maps Docker log patterns to MITRE techniques and compliance frameworks
+
+# Docker container security patterns
+container_patterns:
+  - pattern: "(?i)(privileged mode|root user|escalat|usermod)"
+    description: "Container Privilege Escalation"
+    mitre: "T1068"
+    severity: "critical"
+    
+  - pattern: "(?i)(xmrig|minerd|cgminer|cryptonight|coinhive)"
+    description: "Cryptocurrency Mining Detected"
+    mitre: "T1496"
+    severity: "critical"
+    
+  - pattern: "(?i)(/bin/sh -i|/bin/bash -i|nc -e|/dev/tcp)"
+    description: "Reverse Shell Detected"
+    mitre: "T1059"
+    severity: "critical"
+    
+  - pattern: "(?i)(nmap|nping|masscan|port scan)"
+    description: "Network Scanning from Container"
+    mitre: "T1046"
+    severity: "high"
+    
+  - pattern: "(?i)(/etc/passwd|/etc/shadow|/root/.ssh)"
+    description: "Sensitive File Access"
+    mitre: "T1082"
+    severity: "high"
+    
+  - pattern: "(?i)(escape|breakout|--privileged|--net=host)"
+    description: "Container Escape Attempt"
+    mitre: "T1611"
+    severity: "critical"
+    
+  - pattern: "(?i)(malware|trojan|backdoor|webshell|c2)"
+    description: "Malware in Container"
+    mitre: "T1566"
+    severity: "critical"
+    
+  - pattern: "(?i)(suspicious process|unknown process)"
+    description: "Suspicious Process in Container"
+    mitre: "T1056"
+    severity: "high"
+    
+  - pattern: "(?i)(exfiltrat|upload.*data|curl.*base64)"
+    description: "Data Exfiltration Attempt"
+    mitre: "T1041"
+    severity: "critical"
+    
+  - pattern: "(?i)(pull.*unauthorized|untrusted image|:latest)"
+    description: "Untrusted Container Image"
+    mitre: "T1106"
+    severity: "high"
+
+# Docker daemon patterns
+daemon_patterns:
+  - pattern: "docker.sock"
+    description: "Docker Socket Access"
+    mitre: "T1068"
+    severity: "critical"
+    
+  - pattern: "(?i)(restarting|restart loop|exit 137|OOM killed)"
+    description: "Container Instability/Resource Issue"
+    mitre: "T1496"
+    severity: "medium"
+    
+  - pattern: "(-v /|volume mount|/mnt|/host)"
+    description: "Host Volume Mounted"
+    mitre: "T1611"
+    severity: "high"
+
+# Compliance mappings
+compliance_mapping:
+  pci_dss:
+    - "T1068"
+    - "T1496"
+    - "T1041"
+    - "T1566"
+    - "T1611"
+    
+  gdpr:
+    - "T1041"
+    - "T1566"
+    - "T1068"
+    
+  hipaa:
+    - "T1041"
+    - "T1068"
+    - "T1496"
+    
+  soc2:
+    - "T1068"
+    - "T1046"
+    - "T1611"
+    
+  nist:
+    - "T1068"
+    - "T1496"
+    - "T1041"
+    - "T1611"
+    
+  iso_27001:
+    - "T1068"
+    - "T1041"
+    - "T1566"

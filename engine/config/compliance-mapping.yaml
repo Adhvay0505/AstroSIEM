@@ -1,0 +1,67 @@
+# AstroSIEM Compliance Mapping Configuration
+# Maps MITRE ATT&CK techniques to compliance frameworks
+# Edit this file to customize which techniques trigger which compliance violations
+
+# PCI-DSS: Payment Card Industry Data Security Standard
+# Requires: access control, monitoring, encryption, vulnerability management
+pci_dss:
+  - T1078    # Valid Accounts - unauthorized access
+  - T1110    # Password Guessing - brute force attacks
+  - T1110.001 # Password Guessing
+  - T1110.003 # Password Spraying
+  - T1136    # Create Account - unauthorized account creation
+  - T1021    # Remote Services - unauthorized remote access
+  - T1021.001 # SSH
+  - T1070    # Indicator Removal - log tampering
+  - T1083    # File Discovery - searching for cardholder data
+  - T1041    # Exfiltration - data leaving the network
+
+# GDPR: General Data Protection Regulation (EU)
+# Requires: data protection, breach notification, access control
+gdpr:
+  - T1078    # Valid Accounts - unauthorized access to PII
+  - T1110    # Password Guessing - unauthorized access attempt
+  - T1136    # Create Account - unauthorized account
+  - T1070    # Indicator Removal - hiding breach evidence
+  - T1087    # Account Discovery - finding user accounts
+  - T1005    # Data from Local System - accessing PII
+  - T1041    # Exfiltration - personal data leaving EU
+
+# HIPAA: Health Insurance Portability and Accountability Act
+# Requires: access control, audit controls, integrity controls
+hipaa:
+  - T1078    # Valid Accounts - unauthorized access to PHI
+  - T1110    # Password Guessing - unauthorized access
+  - T1070    # Indicator Removal - covering tracks
+  - T1041    # Exfiltration - patient data exfiltration
+  - T1087    # Account Discovery - finding patient records access
+
+# SOC 2: Service Organization Control 2
+# Requires: access control, monitoring, change management
+soc2:
+  - T1078    # Valid Accounts - unauthorized access
+  - T1110    # Password Guessing
+  - T1136    # Create Account - unauthorized account
+  - T1070    # Indicator Removal - log tampering
+  - T1548    # Privilege Escalation - unauthorized privilege gain
+  - T1059    # Command Execution - unauthorized code execution
+
+# NIST: National Institute of Standards and Technology
+# Requires: identification, access control, audit
+nist:
+  - T1078    # Valid Accounts
+  - T1110    # Password Guessing
+  - T1136    # Create Account
+  - T1548    # Privilege Escalation
+  - T1070    # Indicator Removal
+  - T1059    # Command Execution
+
+# ISO 27001: Information Security Management
+# Requires: access control, cryptography, incident management
+iso_27001:
+  - T1078    # Valid Accounts - unauthorized access
+  - T1110    # Password Guessing - brute force
+  - T1136    # Create Account - unauthorized accounts
+  - T1070    # Indicator Removal - evidence removal
+  - T1548    # Privilege Escalation
+  - T1083    # File Discovery - information gathering

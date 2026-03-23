@@ -1,0 +1,11 @@
+[Unit]
+Description=AstroSIEM Agent - Daily log export
+Requires=astro-siem-agent.service
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

