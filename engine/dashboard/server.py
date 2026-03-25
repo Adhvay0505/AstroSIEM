@@ -24,7 +24,7 @@ CONFIG_DIR = ENGINE_DIR / "config"
 if str(ENGINE_DIR) not in sys.path:
     sys.path.insert(0, str(ENGINE_DIR))
 
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from policy.baselines import evaluate_asset_baseline, load_agent_baselines
 from storage.alert_state import AlertStateStore
@@ -89,7 +89,12 @@ def investigation_event_matches(event: Dict[str, Any], scope: str, value: str) -
     if scope == "host":
         return str(event.get("hostname") or "").lower() == needle
     if scope == "source_ip":
-        return str(event.get("source_ip") or event.get("source", {}).get("ip") or "").lower() == needle
+        return (
+            str(
+                event.get("source_ip") or event.get("source", {}).get("ip") or ""
+            ).lower()
+            == needle
+        )
     if scope == "user":
         candidates = [
             event.get("user"),
@@ -116,7 +121,9 @@ def investigation_alert_matches(alert: Dict[str, Any], scope: str, value: str) -
     return False
 
 
-def investigation_posture_matches(finding: Dict[str, Any], scope: str, value: str) -> bool:
+def investigation_posture_matches(
+    finding: Dict[str, Any], scope: str, value: str
+) -> bool:
     needle = str(value or "").lower()
     if scope == "host":
         return str(finding.get("host_name") or "").lower() == needle
@@ -134,8 +141,13 @@ def investigation_posture_matches(finding: Dict[str, Any], scope: str, value: st
     return False
 
 
-def investigation_case_matches(case: Dict[str, Any], related_alert_ids: List[str], scope: str, value: str) -> bool:
-    if any(alert_id in set(case.get("linked_alerts") or []) for alert_id in related_alert_ids):
+def investigation_case_matches(
+    case: Dict[str, Any], related_alert_ids: List[str], scope: str, value: str
+) -> bool:
+    if any(
+        alert_id in set(case.get("linked_alerts") or [])
+        for alert_id in related_alert_ids
+    ):
         return True
     needle = str(value or "").lower()
     haystack = " ".join(
@@ -148,41 +160,86 @@ def investigation_case_matches(case: Dict[str, Any], related_alert_ids: List[str
     return scope == "user" and needle in haystack
 
 
-def build_investigation(scope: str, value: str, handler: "AstroRequestHandler") -> Dict[str, Any]:
+def build_investigation(
+    scope: str, value: str, handler: "AstroRequestHandler"
+) -> Dict[str, Any]:
     scope = (scope or "host").strip()
     value = (value or "").strip()
-    alerts = [handler._enrich_alert(alert) for alert in handler.store.list_alerts(include_suppressed=True)]
+    alerts = [
+        handler._enrich_alert(alert)
+        for alert in handler.store.list_alerts(include_suppressed=True)
+    ]
     posture_findings = handler.posture_store.list_findings(include_resolved=True)
     assets = handler._list_assets()
     cases = [handler._enrich_case(case) for case in handler.store.list_cases()]
     events = load_processed_events()
 
-    matched_alerts = [alert for alert in alerts if investigation_alert_matches(alert, scope, value)]
-    matched_posture = [finding for finding in posture_findings if investigation_posture_matches(finding, scope, value)]
-    matched_events = [event for event in events if investigation_event_matches(event, scope, value)]
-    matched_events.sort(key=lambda item: parse_timestamp(item.get("timestamp_utc")) or utc_now(), reverse=True)
+    matched_alerts = [
+        alert for alert in alerts if investigation_alert_matches(alert, scope, value)
+    ]
+    matched_posture = [
+        finding
+        for finding in posture_findings
+        if investigation_posture_matches(finding, scope, value)
+    ]
+    matched_events = [
+        event for event in events if investigation_event_matches(event, scope, value)
+    ]
+    matched_events.sort(
+        key=lambda item: parse_timestamp(item.get("timestamp_utc")) or utc_now(),
+        reverse=True,
+    )
 
     if scope == "host":
-        matched_asset = next((asset for asset in assets if str(asset.get("host_name")).lower() == value.lower()), None)
+        matched_asset = next(
+            (
+                asset
+                for asset in assets
+                if str(asset.get("host_name")).lower() == value.lower()
+            ),
+            None,
+        )
     else:
         matched_asset = None
 
-    related_alert_ids = [alert.get("alert_id") for alert in matched_alerts if alert.get("alert_id")]
-    matched_cases = [case for case in cases if investigation_case_matches(case, related_alert_ids, scope, value)]
+    related_alert_ids = [
+        alert.get("alert_id") for alert in matched_alerts if alert.get("alert_id")
+    ]
+    matched_cases = [
+        case
+        for case in cases
+        if investigation_case_matches(case, related_alert_ids, scope, value)
+    ]
 
     recommendations = []
     if matched_alerts:
-        recommendations.append(f"Start with the top {min(len(matched_alerts), 3)} alert(s) because they already contain correlated evidence.")
+        recommendations.append(
+            f"Start with the top {min(len(matched_alerts), 3)} alert(s) because they already contain correlated evidence."
+        )
     if matched_posture:
-        recommendations.append("Check posture findings for host health or policy drift before escalating suspicious activity.")
-    if matched_asset and (matched_asset.get("policy_drift") or {}).get("summary", {}).get("total", 0) > 0:
-        recommendations.append("Review policy drift items to determine whether the activity is tied to recent configuration changes.")
+        recommendations.append(
+            "Check posture findings for host health or policy drift before escalating suspicious activity."
+        )
+    if (
+        matched_asset
+        and (matched_asset.get("policy_drift") or {}).get("summary", {}).get("total", 0)
+        > 0
+    ):
+        recommendations.append(
+            "Review policy drift items to determine whether the activity is tied to recent configuration changes."
+        )
     if scope == "source_ip" and matched_events:
-        recommendations.append("Pivot on the source IP across web, network, and authentication telemetry to confirm campaign breadth.")
+        recommendations.append(
+            "Pivot on the source IP across web, network, and authentication telemetry to confirm campaign breadth."
+        )
     if scope == "user":
-        recommendations.append("Verify whether the user appears in alerts, raw events, and cases before treating the activity as malicious.")
+        recommendations.append(
+            "Verify whether the user appears in alerts, raw events, and cases before treating the activity as malicious."
+        )
     if not recommendations:
-        recommendations.append("No high-confidence related objects were found. Confirm the investigation key and expand the time scope if needed.")
+        recommendations.append(
+            "No high-confidence related objects were found. Confirm the investigation key and expand the time scope if needed."
+        )
 
     timeline = []
     for event in matched_events[:50]:
@@ -192,7 +249,11 @@ def build_investigation(scope: str, value: str, handler: "AstroRequestHandler") 
                 "source": event.get("_source", "-"),
                 "host": event.get("hostname"),
                 "severity": event.get("severity") or event.get("change") or "-",
-                "message": event.get("message") or event.get("description") or event.get("raw_log") or event.get("path") or "-",
+                "message": event.get("message")
+                or event.get("description")
+                or event.get("raw_log")
+                or event.get("path")
+                or "-",
             }
         )
 
@@ -220,7 +281,15 @@ def load_configured_agents() -> Dict[str, Dict[str, Any]]:
 
 
 def build_coverage_snapshot(asset_store: Optional[AssetInventoryStore] = None):
-    expected_sources = ["security", "fim", "network", "apache", "nginx", "docker", "kubernetes"]
+    expected_sources = [
+        "security",
+        "fim",
+        "network",
+        "apache",
+        "nginx",
+        "docker",
+        "kubernetes",
+    ]
     source_files = {
         "security": PROCESSED_DIR / "events-security-processed.json",
         "fim": PROCESSED_DIR / "events-fim-processed.json",
@@ -253,7 +322,9 @@ def build_coverage_snapshot(asset_store: Optional[AssetInventoryStore] = None):
             host_name = event.get("hostname") or "unknown"
             if host_name not in configured_agents:
                 continue
-            host = hosts.setdefault(host_name, {"host": host_name, "sources": set(), "last_seen": None})
+            host = hosts.setdefault(
+                host_name, {"host": host_name, "sources": set(), "last_seen": None}
+            )
             host["sources"].add(source)
             ts = parse_timestamp(event.get("timestamp_utc"))
             if ts and (host["last_seen"] is None or ts > host["last_seen"]):
@@ -279,7 +350,11 @@ def build_coverage_snapshot(asset_store: Optional[AssetInventoryStore] = None):
         else:
             status = "stale"
         source_list = sorted(host["sources"])
-        coverage_score = int((len(source_list) / len(expected_sources)) * 100) if expected_sources else 0
+        coverage_score = (
+            int((len(source_list) / len(expected_sources)) * 100)
+            if expected_sources
+            else 0
+        )
         asset = asset_summaries.get(host["host"], {})
         host_rows.append(
             {
@@ -288,11 +363,16 @@ def build_coverage_snapshot(asset_store: Optional[AssetInventoryStore] = None):
                 "last_seen": last_seen.isoformat() if last_seen else None,
                 "coverage_score": coverage_score,
                 "sources_present": source_list,
-                "missing_sources": [source for source in expected_sources if source not in host["sources"]],
+                "missing_sources": [
+                    source
+                    for source in expected_sources
+                    if source not in host["sources"]
+                ],
                 "environment": asset.get("environment", "unknown"),
                 "business_criticality": asset.get("business_criticality", "medium"),
                 "internet_facing": bool(asset.get("internet_facing")),
-                "owner": asset.get("owner") or configured_agents.get(host["host"], {}).get("description", ""),
+                "owner": asset.get("owner")
+                or configured_agents.get(host["host"], {}).get("description", ""),
                 "package_count": asset.get("package_count", 0),
                 "vulnerability_summary": asset.get("vulnerability_summary", {}),
                 "posture_status": asset.get("posture_status", "normal"),
@@ -303,14 +383,24 @@ def build_coverage_snapshot(asset_store: Optional[AssetInventoryStore] = None):
         "summary": {
             "total_hosts": len(host_rows),
             "healthy_hosts": sum(1 for row in host_rows if row["status"] == "healthy"),
-            "degraded_hosts": sum(1 for row in host_rows if row["status"] == "degraded"),
+            "degraded_hosts": sum(
+                1 for row in host_rows if row["status"] == "degraded"
+            ),
             "stale_hosts": sum(1 for row in host_rows if row["status"] == "stale"),
             "offline_hosts": sum(1 for row in host_rows if row["status"] == "offline"),
-            "average_coverage": int(sum(row["coverage_score"] for row in host_rows) / len(host_rows)) if host_rows else 0,
+            "average_coverage": int(
+                sum(row["coverage_score"] for row in host_rows) / len(host_rows)
+            )
+            if host_rows
+            else 0,
             "reference_timestamp": global_latest.isoformat() if global_latest else None,
-            "hosts_with_inventory": sum(1 for row in host_rows if row.get("package_count", 0) > 0),
+            "hosts_with_inventory": sum(
+                1 for row in host_rows if row.get("package_count", 0) > 0
+            ),
             "critical_vulnerability_hosts": sum(
-                1 for row in host_rows if (row.get("vulnerability_summary") or {}).get("critical", 0) > 0
+                1
+                for row in host_rows
+                if (row.get("vulnerability_summary") or {}).get("critical", 0) > 0
             ),
         },
         "hosts": host_rows,
@@ -319,7 +409,10 @@ def build_coverage_snapshot(asset_store: Optional[AssetInventoryStore] = None):
 
 def build_asset_risk_summary(asset: dict) -> str:
     vuln_summary = asset.get("vulnerability_summary") or {}
-    parts = [f"{asset.get('business_criticality', 'medium')} criticality", asset.get("environment", "unknown")]
+    parts = [
+        f"{asset.get('business_criticality', 'medium')} criticality",
+        asset.get("environment", "unknown"),
+    ]
     if asset.get("internet_facing"):
         parts.append("internet-facing")
     if vuln_summary.get("critical", 0):
@@ -352,35 +445,52 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
             scope = params.get("scope", ["host"])[0]
             value = params.get("value", [""])[0]
             if not value:
-                self._send_json({"error": "missing_investigation_value"}, status=HTTPStatus.BAD_REQUEST)
+                self._send_json(
+                    {"error": "missing_investigation_value"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
                 return
             self._send_json(build_investigation(scope, value, self))
             return
         if parsed.path == "/api/assets":
-            self._send_json({"summary": self._assets_summary(), "assets": self._list_assets()})
+            self._send_json(
+                {"summary": self._assets_summary(), "assets": self._list_assets()}
+            )
             return
         if parsed.path == "/api/posture":
             findings = self.posture_store.list_findings(include_resolved=True)
-            self._send_json({"summary": self.posture_store.summary(findings), "findings": findings})
+            self._send_json(
+                {"summary": self.posture_store.summary(findings), "findings": findings}
+            )
             return
         if parsed.path.startswith("/api/assets/"):
             host_name = parsed.path.rsplit("/", 1)[-1]
-            asset = self.asset_store.get_asset(host_name) or self._fallback_asset(host_name)
+            asset = self.asset_store.get_asset(host_name) or self._fallback_asset(
+                host_name
+            )
             if not asset:
-                self._send_json({"error": "asset_not_found"}, status=HTTPStatus.NOT_FOUND)
+                self._send_json(
+                    {"error": "asset_not_found"}, status=HTTPStatus.NOT_FOUND
+                )
                 return
             asset = dict(asset)
-            asset.update(evaluate_asset_baseline(host_name, asset, load_configured_agents()))
+            asset.update(
+                evaluate_asset_baseline(host_name, asset, load_configured_agents())
+            )
             self._send_json({"asset": asset})
             return
         if parsed.path == "/api/cases":
-            self._send_json({"cases": [self._enrich_case(case) for case in self.store.list_cases()]})
+            self._send_json(
+                {"cases": [self._enrich_case(case) for case in self.store.list_cases()]}
+            )
             return
         if parsed.path.startswith("/api/cases/"):
             case_id = parsed.path.rsplit("/", 1)[-1]
             case = self.store.get_case(case_id)
             if not case:
-                self._send_json({"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND)
+                self._send_json(
+                    {"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND
+                )
                 return
             self._send_json({"case": self._enrich_case(case)})
             return
@@ -389,6 +499,26 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
             return
         if parsed.path == "/api/coverage":
             self._send_json(build_coverage_snapshot(self.asset_store))
+            return
+        if parsed.path == "/api/vulnerabilities":
+            params = parse_qs(parsed.query)
+            status_filter = params.get("status", [""])[0]
+            host_filter = params.get("host", [""])[0]
+            vulns = self.asset_store.get_all_vulnerabilities(
+                status_filter=status_filter,
+                host_filter=host_filter,
+            )
+            vuln_intel = self.asset_store.vulnerability_intelligence_summary()
+            self._send_json(
+                {
+                    "vulnerabilities": vulns,
+                    "summary": vuln_intel,
+                }
+            )
+            return
+        if parsed.path == "/api/feeds":
+            feeds = self.asset_store.list_cve_feeds()
+            self._send_json({"feeds": feeds})
             return
         super().do_GET()
 
@@ -399,7 +529,9 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
             body = self._read_json_body()
             updated = self.store.update_alert(alert_id, body)
             if not updated:
-                self._send_json({"error": "alert_not_found"}, status=HTTPStatus.NOT_FOUND)
+                self._send_json(
+                    {"error": "alert_not_found"}, status=HTTPStatus.NOT_FOUND
+                )
                 return
             self._send_json({"alert": self._enrich_alert(updated)})
             return
@@ -408,7 +540,9 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
             body = self._read_json_body()
             updated = self.store.update_case(case_id, body)
             if not updated:
-                self._send_json({"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND)
+                self._send_json(
+                    {"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND
+                )
                 return
             self._send_json({"case": self._enrich_case(updated)})
             return
@@ -425,14 +559,20 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
                 severity=(body.get("severity") or "medium").strip(),
                 alert_ids=list(body.get("alert_ids") or []),
             )
-            self._send_json({"case": self._enrich_case(case)}, status=HTTPStatus.CREATED)
+            self._send_json(
+                {"case": self._enrich_case(case)}, status=HTTPStatus.CREATED
+            )
             return
         if parsed.path.startswith("/api/cases/") and parsed.path.endswith("/alerts"):
             case_id = parsed.path.split("/")[-2]
             body = self._read_json_body()
-            case = self.store.add_alerts_to_case(case_id, list(body.get("alert_ids") or []))
+            case = self.store.add_alerts_to_case(
+                case_id, list(body.get("alert_ids") or [])
+            )
             if not case:
-                self._send_json({"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND)
+                self._send_json(
+                    {"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND
+                )
                 return
             self._send_json({"case": self._enrich_case(case)})
             return
@@ -445,9 +585,13 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
                 (body.get("comment") or "").strip(),
             )
             if not case:
-                self._send_json({"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND)
+                self._send_json(
+                    {"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND
+                )
                 return
-            self._send_json({"case": self._enrich_case(case)}, status=HTTPStatus.CREATED)
+            self._send_json(
+                {"case": self._enrich_case(case)}, status=HTTPStatus.CREATED
+            )
             return
         if parsed.path == "/api/suppressions":
             body = self._read_json_body()
@@ -464,6 +608,75 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
             )
             self._send_json({"suppression": suppression}, status=HTTPStatus.CREATED)
             return
+        if parsed.path == "/api/vulnerabilities/assign":
+            body = self._read_json_body()
+            pairs = body.get("vulnerabilities", [])
+            assigned_to = (body.get("assigned_to") or "").strip()
+            ticket_id = (body.get("ticket_id") or "").strip()
+            if not pairs or not assigned_to:
+                self._send_json(
+                    {"error": "missing_required_fields"}, status=HTTPStatus.BAD_REQUEST
+                )
+                return
+            count = 0
+            for item in pairs:
+                host = item.get("host_name", "")
+                cve = item.get("cve_id", "")
+                pkg = item.get("package_name", "")
+                if host and cve:
+                    self.asset_store.update_vuln_assignment(
+                        host, cve, assigned_to, ticket_id, pkg
+                    )
+                    count += 1
+            self._send_json({"updated": count})
+            return
+        if parsed.path == "/api/vulnerabilities/status":
+            body = self._read_json_body()
+            pairs = body.get("vulnerabilities", [])
+            status = (body.get("status") or "").strip()
+            reason = (body.get("reason") or "").strip()
+            if not pairs or status not in {
+                "open",
+                "in_progress",
+                "fixed",
+                "false_positive",
+            }:
+                self._send_json(
+                    {"error": "invalid_status_or_missing_vulnerabilities"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+                return
+            count = 0
+            for item in pairs:
+                host = item.get("host_name", "")
+                cve = item.get("cve_id", "")
+                pkg = item.get("package_name", "")
+                if host and cve:
+                    self.asset_store.update_vuln_status(host, cve, status, reason, pkg)
+                    count += 1
+            self._send_json({"updated": count})
+            return
+        if parsed.path == "/api/vulnerabilities/bulk-status":
+            body = self._read_json_body()
+            host_cve_pairs = body.get("vulnerabilities", [])
+            status = (body.get("status") or "").strip()
+            reason = (body.get("reason") or "").strip()
+            if not host_cve_pairs or status not in {
+                "open",
+                "in_progress",
+                "fixed",
+                "false_positive",
+            }:
+                self._send_json(
+                    {"error": "invalid_status_or_missing_vulnerabilities"},
+                    status=HTTPStatus.BAD_REQUEST,
+                )
+                return
+            count = self.asset_store.bulk_update_vuln_status(
+                host_cve_pairs, status, reason
+            )
+            self._send_json({"updated": count})
+            return
         self._send_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 
     def do_DELETE(self):
@@ -479,7 +692,9 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
             alert_id = parts[-1]
             case = self.store.remove_alert_from_case(case_id, alert_id)
             if not case:
-                self._send_json({"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND)
+                self._send_json(
+                    {"error": "case_not_found"}, status=HTTPStatus.NOT_FOUND
+                )
                 return
             self._send_json({"case": self._enrich_case(case)})
             return
@@ -494,7 +709,12 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
         params = parse_qs(parsed.query)
         include_suppressed = params.get("include_suppressed", ["0"])[0] == "1"
         alerts = self.store.list_alerts(include_suppressed=include_suppressed)
-        self._send_json({"summary": self.store.summary(alerts), "alerts": [self._enrich_alert(alert) for alert in alerts]})
+        self._send_json(
+            {
+                "summary": self.store.summary(alerts),
+                "alerts": [self._enrich_alert(alert) for alert in alerts],
+            }
+        )
 
     def _handle_get_suppressions(self) -> None:
         self._send_json({"suppressions": self.store.list_active_suppressions()})
@@ -516,17 +736,24 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
                 "business_criticality": host.get("business_criticality", "medium"),
                 "owner": host.get("owner", ""),
                 "internet_facing": bool(host.get("internet_facing")),
+                "inventory_digest": None,
                 "last_inventory_at": None,
+                "last_vuln_scan_at": None,
                 "updated_at": None,
                 "packages": [],
                 "services": [],
                 "config_checks": [],
                 "vulnerabilities": [],
+                "vuln_correlation": [],
                 "package_count": 0,
                 "service_count": 0,
                 "config_check_count": 0,
-                "vulnerability_summary": host.get("vulnerability_summary", {"critical": 0, "high": 0, "medium": 0, "low": 0, "open_total": 0}),
+                "vulnerability_summary": host.get(
+                    "vulnerability_summary",
+                    {"critical": 0, "high": 0, "medium": 0, "low": 0, "open_total": 0},
+                ),
                 "posture_status": host.get("posture_status", "normal"),
+                "vulnerability_intelligence": self.asset_store.vulnerability_intelligence_summary(),
             }
             payload.update(evaluate_asset_baseline(host_name, payload, agents))
             return payload
@@ -534,37 +761,63 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
 
     def _list_assets(self):
         configured_agents = load_configured_agents()
-        assets = {
-            item["host_name"]: item
-            for item in self.asset_store.list_asset_summaries()
-            if item.get("host_name") in configured_agents
-        }
+        host_names = set(configured_agents)
         for host in build_coverage_snapshot(self.asset_store).get("hosts", []):
-            host_name = host.get("host")
-            if host_name and host_name not in assets:
-                assets[host_name] = self._fallback_asset(host_name)
-        enriched = []
-        for host_name, asset in assets.items():
-            payload = dict(asset)
-            payload.update(evaluate_asset_baseline(host_name, payload, configured_agents))
-            enriched.append(payload)
-        return sorted(enriched, key=lambda item: item.get("host_name", ""))
+            host_names.add(host.get("host"))
+        assets = []
+        for host_name in host_names:
+            full_asset = self.asset_store.get_asset(host_name)
+            if full_asset:
+                payload = dict(full_asset)
+                payload.update(
+                    evaluate_asset_baseline(host_name, payload, configured_agents)
+                )
+                assets.append(payload)
+            else:
+                fallback = self._fallback_asset(host_name)
+                if fallback:
+                    assets.append(fallback)
+        return sorted(assets, key=lambda item: item.get("host_name", ""))
 
     def _assets_summary(self):
         assets = self._list_assets()
+        vuln_intel = self.asset_store.vulnerability_intelligence_summary()
         return {
             "total_assets": len(assets),
-            "internet_facing_assets": sum(1 for item in assets if item.get("internet_facing")),
-            "critical_hosts": sum(1 for item in assets if (item.get("vulnerability_summary") or {}).get("critical", 0) > 0),
-            "total_vulnerabilities": sum((item.get("vulnerability_summary") or {}).get("open_total", 0) for item in assets),
-            "high_risk_assets": sum(1 for item in assets if item.get("posture_status") in {"critical", "elevated"}),
-            "drifted_assets": sum(1 for item in assets if ((item.get("policy_drift") or {}).get("summary", {}).get("total", 0) > 0)),
+            "internet_facing_assets": sum(
+                1 for item in assets if item.get("internet_facing")
+            ),
+            "critical_hosts": sum(
+                1
+                for item in assets
+                if (item.get("vulnerability_summary") or {}).get("critical", 0) > 0
+            ),
+            "total_vulnerabilities": sum(
+                (item.get("vulnerability_summary") or {}).get("open_total", 0)
+                for item in assets
+            ),
+            "high_risk_assets": sum(
+                1
+                for item in assets
+                if item.get("posture_status") in {"critical", "elevated"}
+            ),
+            "drifted_assets": sum(
+                1
+                for item in assets
+                if (
+                    (item.get("policy_drift") or {}).get("summary", {}).get("total", 0)
+                    > 0
+                )
+            ),
+            "vulnerability_intelligence": vuln_intel,
         }
 
     def _alert_asset_contexts(self, alert):
         contexts = []
         for host_name in (alert.get("entities", {}) or {}).get("hosts", []):
-            asset = self.asset_store.get_asset(host_name) or self._fallback_asset(host_name)
+            asset = self.asset_store.get_asset(host_name) or self._fallback_asset(
+                host_name
+            )
             if not asset:
                 continue
             contexts.append(
@@ -587,13 +840,21 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
         enriched = dict(alert)
         asset_contexts = self._alert_asset_contexts(alert)
         enriched["asset_contexts"] = asset_contexts
-        enriched["primary_asset_context"] = asset_contexts[0] if asset_contexts else None
-        enriched["asset_risk_summary"] = asset_contexts[0]["risk_summary"] if asset_contexts else ""
+        enriched["primary_asset_context"] = (
+            asset_contexts[0] if asset_contexts else None
+        )
+        enriched["asset_risk_summary"] = (
+            asset_contexts[0]["risk_summary"] if asset_contexts else ""
+        )
         return enriched
 
     def _enrich_case(self, case):
         enriched = dict(case)
-        linked_alert_details = [self._enrich_alert(alert) for alert in (case.get("linked_alert_details") or []) if alert]
+        linked_alert_details = [
+            self._enrich_alert(alert)
+            for alert in (case.get("linked_alert_details") or [])
+            if alert
+        ]
         if linked_alert_details:
             enriched["linked_alert_details"] = linked_alert_details
         enriched["asset_scope"] = sorted(
@@ -634,7 +895,9 @@ def main():
     root = Path(args.root).resolve()
     handler = partial(AstroRequestHandler, directory=str(root))
     with ThreadingHTTPServer((args.bind, args.port), handler) as httpd:
-        print(f"Serving AstroSIEM on http://{args.bind}:{args.port}/dashboard/login.html")
+        print(
+            f"Serving AstroSIEM on http://{args.bind}:{args.port}/dashboard/login.html"
+        )
         httpd.serve_forever()
 
 

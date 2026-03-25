@@ -1590,6 +1590,11 @@ async function loadPostureData() {
 function renderAssetStats(summary) {
   const container = document.getElementById('assetStats');
   if (!container) return;
+  const vulnIntel = summary.vulnerability_intelligence || {};
+  const feedFreshness = vulnIntel.feed_freshness || [];
+  const correlationStatus = vulnIntel.correlation_status || {};
+  const feedStatus = feedFreshness.length > 0 ? feedFreshness[0] : null;
+  const feedStatusBadge = feedStatus ? `<span class="status-pill-inline ${feedStatus.status === 'fresh' ? '' : feedStatus.status === 'stale' ? 'severity-high' : 'severity-critical'}">${feedStatus.status || 'unknown'}</span>` : '';
   const stats = [
     { label: 'Assets', value: summary.total_assets || 0 },
     { label: 'Internet-Facing', value: summary.internet_facing_assets || 0 },
@@ -1598,12 +1603,21 @@ function renderAssetStats(summary) {
     { label: 'High-Risk Assets', value: summary.high_risk_assets || 0 },
     { label: 'Policy Drift', value: summary.drifted_assets || 0 }
   ];
-  container.innerHTML = stats.map(stat => `
+  let html = stats.map(stat => `
     <div class="coverage-card">
       <div class="value">${stat.value}</div>
       <div class="label">${stat.label}</div>
     </div>
   `).join('');
+  if (feedStatus) {
+    html += `
+      <div class="coverage-card" style="grid-column: span 2;">
+        <div class="value" style="font-size: 0.9em;">${feedStatusBadge} NVD feed: ${feedStatus.hours_ago !== null ? feedStatus.hours_ago + 'h ago' : 'never'}</div>
+        <div class="label">Vulnerability Intelligence</div>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
 }
 
 function formatVulnerabilitySummary(summary) {
@@ -1677,14 +1691,35 @@ function renderAssetEditor(asset) {
     .concat(asset.primary_ip ? [`<span class="inline-tag">IP: ${safeText(asset.primary_ip)}</span>`] : [])
     .join('');
 
-  const vulnerabilities = Array.isArray(asset.vulnerabilities) ? asset.vulnerabilities.slice(0, 12) : [];
-  vulnEl.innerHTML = vulnerabilities.length ? vulnerabilities.map(item => `
-    <div class="detail-block" style="margin-bottom: 10px;">
-      <div class="label">${safeText(item.cve_id)} | ${safeText(item.severity)} | ${safeText(item.package_name || '-')}</div>
-      <div class="alert-meta">Version: ${safeText(item.package_version || '-')} | Fix: ${safeText(item.fix_version || '-')} | Score: ${safeText(item.score ?? '-')}</div>
-      <div class="alert-recommendation" style="margin-top: 6px;">${safeText(item.summary || item.title || 'No summary available.')}</div>
-    </div>
-  `).join('') : 'No vulnerabilities recorded for this asset.';
+  const vulnCorrelation = Array.isArray(asset.vuln_correlation) ? asset.vuln_correlation : [];
+  const vulnByCve = {};
+  (Array.isArray(asset.vulnerabilities) ? asset.vulnerabilities : []).forEach(v => {
+    vulnByCve[v.cve_id] = v;
+  });
+  vulnEl.innerHTML = vulnCorrelation.length ? vulnCorrelation.slice(0, 15).map(item => {
+    const statusClass = item.status === 'open' ? 'severity-critical' : item.status === 'in_progress' ? 'severity-high' : item.status === 'fixed' ? 'severity-low' : '';
+    const statusBadge = `<span class="status-pill-inline ${statusClass}">${safeText(item.status || 'open')}</span>`;
+    const assignmentInfo = item.assigned_to ? `<span class="inline-tag">Assigned: ${safeText(item.assigned_to)}</span>` : '';
+    const ticketInfo = item.ticket_id ? `<span class="inline-tag">Ticket: ${safeText(item.ticket_id)}</span>` : '';
+    const rawVuln = vulnByCve[item.cve_id] || {};
+    return `
+      <div class="detail-block" style="margin-bottom: 10px;">
+        <div class="label">${safeText(item.cve_id)} | ${safeText(item.package_name || '-')} ${statusBadge}</div>
+        <div class="alert-meta">Version: ${safeText(item.package_version || '-')} | Score: ${safeText(rawVuln.score ?? '-')}</div>
+        <div class="inline-tags" style="margin-top: 4px;">${assignmentInfo}${ticketInfo}</div>
+        <div class="alert-meta" style="margin-top: 4px;">First seen: ${safeText(item.first_seen || '-')} | Last seen: ${safeText(item.last_seen || '-')}</div>
+        ${item.status_reason ? `<div class="alert-recommendation" style="margin-top: 4px;">${safeText(item.status_reason)}</div>` : ''}
+      </div>
+    `;
+  }).join('') : (asset.vulnerabilities && asset.vulnerabilities.length ? `
+    <div style="margin-bottom: 10px;"><em>Legacy vulnerability data (no correlation tracking)</em></div>
+    ${(asset.vulnerabilities || []).slice(0, 10).map(item => `
+      <div class="detail-block" style="margin-bottom: 10px;">
+        <div class="label">${safeText(item.cve_id)} | ${safeText(item.severity)} | ${safeText(item.package_name || '-')}</div>
+        <div class="alert-meta">Version: ${safeText(item.package_version || '-')} | Fix: ${safeText(item.fix_version || '-')} | Score: ${safeText(item.score ?? '-')}</div>
+      </div>
+    `).join('')}
+  ` : 'No vulnerabilities recorded for this asset.');
 
   const services = Array.isArray(asset.services) ? asset.services.slice(0, 20) : [];
   servicesEl.innerHTML = services.length ? services.map(item => `
