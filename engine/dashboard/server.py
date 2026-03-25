@@ -30,6 +30,8 @@ from policy.baselines import evaluate_asset_baseline, load_agent_baselines
 from storage.alert_state import AlertStateStore
 from storage.asset_inventory import AssetInventoryStore
 from storage.posture_state import PostureStateStore
+from storage.risk_scores import RiskScoreStore
+from detection.risk_engine import RiskEngine
 
 
 def utc_now() -> datetime:
@@ -520,6 +522,29 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
             feeds = self.asset_store.list_cve_feeds()
             self._send_json({"feeds": feeds})
             return
+        if parsed.path == "/api/risk":
+            risk_store = RiskScoreStore()
+            self._send_json(risk_store.summarize())
+            return
+        if parsed.path == "/api/risk/hosts":
+            risk_store = RiskScoreStore()
+            engine = RiskEngine()
+            all_assets = self.asset_store.list_assets()
+            host_risks = []
+            for asset in all_assets:
+                host_name = asset.get("host_name")
+                if host_name:
+                    summary = engine.get_host_risk_summary(host_name)
+                    host_risks.append(summary)
+            host_risks.sort(key=lambda x: x.get("risk_score", 0), reverse=True)
+            self._send_json({"hosts": host_risks})
+            return
+        if parsed.path.startswith("/api/risk/hosts/"):
+            host_name = parsed.path.rsplit("/", 1)[-1]
+            engine = RiskEngine()
+            summary = engine.get_host_risk_summary(host_name)
+            self._send_json({"host_risk": summary})
+            return
         super().do_GET()
 
     def do_PATCH(self):
@@ -676,6 +701,34 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
                 host_cve_pairs, status, reason
             )
             self._send_json({"updated": count})
+            return
+        if parsed.path == "/api/risk/recalculate":
+            engine = RiskEngine()
+            result = engine.recalculate_all_host_risks()
+            self._send_json(result)
+            return
+        if parsed.path == "/api/risk/escalate":
+            engine = RiskEngine()
+            result = engine.auto_escalate_critical_vulnerabilities()
+            self._send_json(result)
+            return
+        if parsed.path == "/api/risk/hosts":
+            body = self._read_json_body()
+            host_name = body.get("host_name", "")
+            if not host_name:
+                self._send_json(
+                    {"error": "missing_host_name"}, status=HTTPStatus.BAD_REQUEST
+                )
+                return
+            risk_store = RiskScoreStore()
+            action = body.get("action", "get")
+            if action == "reset":
+                risk_store.reset_risk("host", host_name)
+                self._send_json({"reset": host_name})
+                return
+            engine = RiskEngine()
+            summary = engine.get_host_risk_summary(host_name)
+            self._send_json({"host_risk": summary})
             return
         self._send_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 

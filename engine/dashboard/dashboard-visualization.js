@@ -1630,6 +1630,16 @@ function formatVulnerabilitySummary(summary) {
   ].join(', ');
 }
 
+function getRiskBadge(riskScore, riskLevel) {
+  if (riskScore === undefined || riskScore === null || riskScore === 0) {
+    return '<span class="status-pill-inline">No risk data</span>';
+  }
+  const levelClass = riskLevel === 'critical' ? 'severity-critical' : 
+                     riskLevel === 'high' ? 'severity-high' : 
+                     riskLevel === 'medium' ? 'severity-warning' : 'severity-low';
+  return `<span class="status-pill-inline ${levelClass}">${riskScore} (${riskLevel})</span>`;
+}
+
 function renderAssetsTable(data) {
   if (!assetsDT) {
     assetsDT = $('#assets-table').DataTable({
@@ -1639,19 +1649,25 @@ function renderAssetsTable(data) {
     });
   }
 
-  const rows = data.map(asset => [
-    `
-      <div class="alert-title">${safeText(asset.host_name)}</div>
-      <div class="alert-meta">${safeText(asset.os_name)} ${safeText(asset.os_version, '')} | ${safeText(asset.primary_ip || '-')}</div>
-    `,
-    `<span class="status-pill-inline">${safeText(asset.posture_status || 'normal')}</span>`,
-    `<span class="severity-${safeToken(asset.business_criticality || 'medium')}">${safeText(asset.business_criticality || 'medium')}</span>`,
-    asset.internet_facing ? 'Internet-facing' : safeText(asset.environment || 'unknown'),
-    `<span data-sort="${Number(asset.package_count || 0)}">${safeText(asset.package_count || 0)}</span>`,
-    `<span data-sort="${Number((asset.vulnerability_summary || {}).open_total || 0)}">${safeText(formatVulnerabilitySummary(asset.vulnerability_summary || {}))}</span>`,
-    safeText(asset.owner || '-'),
-    `<button class="alert-action-btn asset-view-btn" data-asset-host="${safeText(asset.host_name)}">Inspect</button><button class="alert-action-btn asset-investigate-btn" data-asset-host="${safeText(asset.host_name)}">Investigate</button>`
-  ]);
+  const rows = data.map(asset => {
+    const riskData = assetsRiskData[asset.host_name] || {};
+    const riskScore = riskData.risk_score || 0;
+    const riskLevel = riskData.risk_level || 'low';
+    return [
+      `
+        <div class="alert-title">${safeText(asset.host_name)}</div>
+        <div class="alert-meta">${safeText(asset.os_name)} ${safeText(asset.os_version, '')} | ${safeText(asset.primary_ip || '-')}</div>
+      `,
+      getRiskBadge(riskScore, riskLevel),
+      `<span class="status-pill-inline">${safeText(asset.posture_status || 'normal')}</span>`,
+      `<span class="severity-${safeToken(asset.business_criticality || 'medium')}">${safeText(asset.business_criticality || 'medium')}</span>`,
+      asset.internet_facing ? 'Internet-facing' : safeText(asset.environment || 'unknown'),
+      `<span data-sort="${Number(asset.package_count || 0)}">${safeText(asset.package_count || 0)}</span>`,
+      `<span data-sort="${Number((asset.vulnerability_summary || {}).open_total || 0)}">${safeText(formatVulnerabilitySummary(asset.vulnerability_summary || {}))}</span>`,
+      safeText(asset.owner || '-'),
+      `<button class="alert-action-btn asset-view-btn" data-asset-host="${safeText(asset.host_name)}">Inspect</button><button class="alert-action-btn asset-investigate-btn" data-asset-host="${safeText(asset.host_name)}">Investigate</button>`
+    ];
+  });
 
   assetsDT.clear();
   assetsDT.rows.add(rows);
@@ -1662,6 +1678,7 @@ function renderAssetsTable(data) {
 function renderAssetEditor(asset) {
   const summaryEl = document.getElementById('assetEditorSummary');
   const tagsEl = document.getElementById('assetEditorTags');
+  const riskEl = document.getElementById('assetRiskPanel');
   const vulnEl = document.getElementById('assetVulnerabilitiesPanel');
   const servicesEl = document.getElementById('assetServicesPanel');
   const baselineEl = document.getElementById('assetBaselinePanel');
@@ -1673,6 +1690,7 @@ function renderAssetEditor(asset) {
   if (!asset) {
     summaryEl.textContent = 'Select an asset to inspect posture, package inventory, and vulnerability context.';
     tagsEl.innerHTML = '';
+    riskEl.textContent = 'No asset selected.';
     vulnEl.textContent = 'No asset selected.';
     servicesEl.textContent = 'No asset selected.';
     baselineEl.textContent = 'No asset selected.';
@@ -1682,6 +1700,23 @@ function renderAssetEditor(asset) {
     return;
   }
 
+  const riskData = assetsRiskData[asset.host_name] || {};
+  const riskScore = riskData.risk_score || 0;
+  const riskLevel = riskData.risk_level || 'low';
+  const riskFactors = riskData.risk_factors || [];
+  const riskLevelClass = riskLevel === 'critical' ? 'severity-critical' : 
+                         riskLevel === 'high' ? 'severity-high' : 
+                         riskLevel === 'medium' ? 'severity-warning' : 'severity-low';
+  
+  riskEl.innerHTML = riskScore > 0 ? `
+    <div class="detail-block" style="margin-bottom: 10px;">
+      <div class="label">Risk Score: <span class="${riskLevelClass}">${riskScore} (${riskLevel.toUpperCase()})</span></div>
+      <div class="alert-meta">Alert count: ${riskData.alert_count || 0}</div>
+      ${riskFactors.length ? `<div class="alert-meta" style="margin-top: 8px;"><strong>Risk Factors:</strong></div>` : ''}
+      ${riskFactors.slice(0, 10).map(f => `<div class="alert-meta">• ${safeText(f.detail || f.type)}</div>`).join('')}
+    </div>
+  ` : '<div class="alert-meta">No risk data available. Run risk recalculation.</div>';
+
   summaryEl.textContent = `${asset.host_name} | ${asset.os_name} ${asset.os_version || ''} | posture ${asset.posture_status || 'normal'} | ${Number(asset.package_count || 0)} package(s) | ${Number(asset.service_count || 0)} service(s) | ${Number((asset.vulnerability_summary || {}).open_total || 0)} open CVE(s)`;
   tagsEl.innerHTML = []
     .concat([`<span class="inline-tag">Criticality: ${safeText(asset.business_criticality || 'medium')}</span>`])
@@ -1689,6 +1724,7 @@ function renderAssetEditor(asset) {
     .concat(asset.internet_facing ? [`<span class="inline-tag">Internet-Facing</span>`] : [])
     .concat(asset.owner ? [`<span class="inline-tag">Owner: ${safeText(asset.owner)}</span>`] : [])
     .concat(asset.primary_ip ? [`<span class="inline-tag">IP: ${safeText(asset.primary_ip)}</span>`] : [])
+    .concat(riskScore > 0 ? [`<span class="inline-tag ${riskLevelClass}">Risk: ${riskScore}</span>`] : [])
     .join('');
 
   const vulnCorrelation = Array.isArray(asset.vuln_correlation) ? asset.vuln_correlation : [];
@@ -1753,9 +1789,19 @@ function renderAssetEditor(asset) {
   `).join('') : 'No packages recorded for this asset.';
 }
 
+let assetsRiskData = {};
+
 async function loadAssets() {
   const payload = await apiJson('/api/assets');
   assetsData = Array.isArray(payload.assets) ? payload.assets : [];
+  
+  const riskPayload = await apiJson('/api/risk/hosts');
+  const riskHosts = Array.isArray(riskPayload.hosts) ? riskPayload.hosts : [];
+  assetsRiskData = {};
+  riskHosts.forEach(r => {
+    assetsRiskData[r.host_name] = r;
+  });
+  
   renderAssetStats(payload.summary || {});
   renderAssetsTable(assetsData);
   if (selectedAssetHost) {

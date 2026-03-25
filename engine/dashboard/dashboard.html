@@ -2071,6 +2071,7 @@
           <thead>
             <tr>
               <th>Host</th>
+              <th>Risk</th>
               <th>Posture</th>
               <th>Criticality</th>
               <th>Exposure</th>
@@ -2088,6 +2089,10 @@
             <div class="alert-meta" id="assetEditorSummary">Select an asset to inspect posture, package inventory, and vulnerability context.</div>
             <div class="inline-tags" id="assetEditorTags"></div>
             <div class="detail-stack stack-gap-md">
+              <div class="detail-block">
+                <div class="label">Risk Score</div>
+                <div class="scan-log stack-none" id="assetRiskPanel">No asset selected.</div>
+              </div>
               <div class="detail-block">
                 <div class="label">Top Vulnerabilities</div>
                 <div class="scan-log stack-none" id="assetVulnerabilitiesPanel">No asset selected.</div>

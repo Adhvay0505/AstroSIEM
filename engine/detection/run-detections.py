@@ -28,6 +28,8 @@ if str(ENGINE_DIR) not in sys.path:
 
 from storage.alert_state import AlertStateStore
 from storage.asset_inventory import AssetInventoryStore
+from detection.risk_engine import RiskEngine
+
 PROCESSED_DIR = ENGINE_DIR / "processed-data"
 RULES_DIR = ENGINE_DIR / "rules"
 OUTPUT_FILE = PROCESSED_DIR / "alerts-analyst.json"
@@ -123,7 +125,10 @@ def event_matches(event: Dict[str, Any], conditions: Dict[str, Any]) -> bool:
             for op, operand in expected.items():
                 if op == "in" and actual not in operand:
                     return False
-                if op == "contains" and operand.lower() not in str(actual or "").lower():
+                if (
+                    op == "contains"
+                    and operand.lower() not in str(actual or "").lower()
+                ):
                     return False
                 if op == "contains_any":
                     haystack = str(actual or "").lower()
@@ -192,7 +197,14 @@ def derive_security_action(process: str, message: str) -> Tuple[str, str, str]:
         category = "authentication"
         action = "invalid_user"
         severity = "high"
-    elif any(term in msg for term in ["authentication failure", "failed password", "too many authentication failures"]):
+    elif any(
+        term in msg
+        for term in [
+            "authentication failure",
+            "failed password",
+            "too many authentication failures",
+        ]
+    ):
         category = "authentication"
         action = "login_failed"
         severity = "critical" if "too many authentication failures" in msg else "high"
@@ -276,8 +288,12 @@ def normalize_fim_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "event": {
                     "category": "file",
                     "action": action_map.get(change, "file_modified"),
-                    "severity": "high" if str(raw.get("path", "")).startswith(("/etc", "/root")) else "medium",
-                    "severity_score": 78 if str(raw.get("path", "")).startswith(("/etc", "/root")) else 55,
+                    "severity": "high"
+                    if str(raw.get("path", "")).startswith(("/etc", "/root"))
+                    else "medium",
+                    "severity_score": 78
+                    if str(raw.get("path", "")).startswith(("/etc", "/root"))
+                    else 55,
                 },
                 "host": {"name": raw.get("hostname", "unknown")},
                 "source": {"ip": None},
@@ -314,7 +330,10 @@ def normalize_network_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any
                 },
                 "host": {"name": raw.get("hostname", "unknown")},
                 "source": {"ip": raw.get("source_ip")},
-                "destination": {"ip": raw.get("destination_ip"), "port": raw.get("destination_port")},
+                "destination": {
+                    "ip": raw.get("destination_ip"),
+                    "port": raw.get("destination_port"),
+                },
                 "user": {"name": None},
                 "process": {"name": raw.get("log_type", "network"), "pid": None},
                 "file": {"path": None},
@@ -334,12 +353,17 @@ def classify_web_action(description: str) -> str:
     desc = (description or "").lower()
     if any(term in desc for term in ["code execution", "backdoor", "shell"]):
         return "web_rce_indicator"
-    if any(term in desc for term in ["scanner", "missing php file", "access denied by configuration"]):
+    if any(
+        term in desc
+        for term in ["scanner", "missing php file", "access denied by configuration"]
+    ):
         return "scanner_activity"
     return "web_exploit_attempt"
 
 
-def normalize_web_events(events: List[Dict[str, Any]], source_name: str) -> List[Dict[str, Any]]:
+def normalize_web_events(
+    events: List[Dict[str, Any]], source_name: str
+) -> List[Dict[str, Any]]:
     normalized = []
     for raw in events:
         description = raw.get("description") or raw.get("raw_log", "")
@@ -407,7 +431,10 @@ def normalize_docker_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]
                 "user": {"name": None},
                 "process": {"name": raw.get("log_type", "docker"), "pid": None},
                 "file": {"path": None},
-                "container": {"name": raw.get("container_name"), "image": raw.get("image_name")},
+                "container": {
+                    "name": raw.get("container_name"),
+                    "image": raw.get("image_name"),
+                },
                 "kubernetes": {"namespace": None, "pod_name": None},
                 "message": description,
                 "description": description,
@@ -454,7 +481,10 @@ def normalize_k8s_events(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 "process": {"name": raw.get("log_type", "kubernetes"), "pid": None},
                 "file": {"path": None},
                 "container": {"name": None, "image": None},
-                "kubernetes": {"namespace": raw.get("namespace"), "pod_name": raw.get("pod_name")},
+                "kubernetes": {
+                    "namespace": raw.get("namespace"),
+                    "pod_name": raw.get("pod_name"),
+                },
                 "message": description,
                 "description": description,
                 "mitre": raw.get("mitre", []),
@@ -488,14 +518,26 @@ def stable_event_id(prefix: str, raw: Dict[str, Any]) -> str:
 def load_all_normalized_events() -> List[Dict[str, Any]]:
     security = load_json(PROCESSED_DIR / "events-security-processed.json", [])
     fim = load_json(PROCESSED_DIR / "events-fim-processed.json", [])
-    network = load_json(PROCESSED_DIR / "events-network-processed.json", {}).get("events", [])
-    apache = load_json(PROCESSED_DIR / "events-apache-processed.json", {}).get("events", [])
-    nginx = load_json(PROCESSED_DIR / "events-nginx-processed.json", {}).get("events", [])
-    docker = load_json(PROCESSED_DIR / "events-docker-processed.json", {}).get("events", [])
-    kubernetes = load_json(PROCESSED_DIR / "events-kubernetes-processed.json", {}).get("events", [])
+    network = load_json(PROCESSED_DIR / "events-network-processed.json", {}).get(
+        "events", []
+    )
+    apache = load_json(PROCESSED_DIR / "events-apache-processed.json", {}).get(
+        "events", []
+    )
+    nginx = load_json(PROCESSED_DIR / "events-nginx-processed.json", {}).get(
+        "events", []
+    )
+    docker = load_json(PROCESSED_DIR / "events-docker-processed.json", {}).get(
+        "events", []
+    )
+    kubernetes = load_json(PROCESSED_DIR / "events-kubernetes-processed.json", {}).get(
+        "events", []
+    )
 
     events = []
-    events.extend(normalize_security_events(security if isinstance(security, list) else []))
+    events.extend(
+        normalize_security_events(security if isinstance(security, list) else [])
+    )
     events.extend(normalize_fim_events(fim if isinstance(fim, list) else []))
     events.extend(normalize_network_events(network))
     events.extend(normalize_web_events(apache, "apache"))
@@ -510,7 +552,9 @@ def group_signature(event: Dict[str, Any], fields: List[str]) -> Tuple[Any, ...]
     return tuple(get_path(event, field) for field in fields)
 
 
-def select_best_threshold_window(events: List[Dict[str, Any]], rule: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
+def select_best_threshold_window(
+    events: List[Dict[str, Any]], rule: Dict[str, Any]
+) -> Optional[List[Dict[str, Any]]]:
     if not events:
         return None
     window = timedelta(minutes=rule.get("window_minutes", 60))
@@ -527,7 +571,9 @@ def select_best_threshold_window(events: List[Dict[str, Any]], rule: Dict[str, A
     return None
 
 
-def select_best_distinct_window(events: List[Dict[str, Any]], rule: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
+def select_best_distinct_window(
+    events: List[Dict[str, Any]], rule: Dict[str, Any]
+) -> Optional[List[Dict[str, Any]]]:
     if not events:
         return None
     window = timedelta(minutes=rule.get("window_minutes", 60))
@@ -562,19 +608,69 @@ def select_best_distinct_window(events: List[Dict[str, Any]], rule: Dict[str, An
 
 def summarize_entities(events: List[Dict[str, Any]]) -> Dict[str, List[str]]:
     entity_map = {
-        "hosts": sorted({get_path(event, "host.name") for event in events if get_path(event, "host.name")}),
-        "source_ips": sorted({get_path(event, "source.ip") for event in events if get_path(event, "source.ip")}),
-        "destination_ips": sorted({get_path(event, "destination.ip") for event in events if get_path(event, "destination.ip")}),
-        "users": sorted({get_path(event, "user.name") for event in events if get_path(event, "user.name")}),
-        "containers": sorted({get_path(event, "container.name") for event in events if get_path(event, "container.name")}),
-        "namespaces": sorted({get_path(event, "kubernetes.namespace") for event in events if get_path(event, "kubernetes.namespace")}),
-        "files": sorted({get_path(event, "file.path") for event in events if get_path(event, "file.path")}),
-        "telemetry_sources": sorted({get_path(event, "telemetry.source") for event in events if get_path(event, "telemetry.source")}),
+        "hosts": sorted(
+            {
+                get_path(event, "host.name")
+                for event in events
+                if get_path(event, "host.name")
+            }
+        ),
+        "source_ips": sorted(
+            {
+                get_path(event, "source.ip")
+                for event in events
+                if get_path(event, "source.ip")
+            }
+        ),
+        "destination_ips": sorted(
+            {
+                get_path(event, "destination.ip")
+                for event in events
+                if get_path(event, "destination.ip")
+            }
+        ),
+        "users": sorted(
+            {
+                get_path(event, "user.name")
+                for event in events
+                if get_path(event, "user.name")
+            }
+        ),
+        "containers": sorted(
+            {
+                get_path(event, "container.name")
+                for event in events
+                if get_path(event, "container.name")
+            }
+        ),
+        "namespaces": sorted(
+            {
+                get_path(event, "kubernetes.namespace")
+                for event in events
+                if get_path(event, "kubernetes.namespace")
+            }
+        ),
+        "files": sorted(
+            {
+                get_path(event, "file.path")
+                for event in events
+                if get_path(event, "file.path")
+            }
+        ),
+        "telemetry_sources": sorted(
+            {
+                get_path(event, "telemetry.source")
+                for event in events
+                if get_path(event, "telemetry.source")
+            }
+        ),
     }
     return entity_map
 
 
-def find_sequence_matches(group_events: List[Dict[str, Any]], rule: Dict[str, Any]) -> List[List[Dict[str, Any]]]:
+def find_sequence_matches(
+    group_events: List[Dict[str, Any]], rule: Dict[str, Any]
+) -> List[List[Dict[str, Any]]]:
     steps = rule.get("steps", [])
     if not steps:
         return []
@@ -623,18 +719,34 @@ def find_sequence_matches(group_events: List[Dict[str, Any]], rule: Dict[str, An
     return matches
 
 
-def template_context(events: List[Dict[str, Any]], rule: Dict[str, Any]) -> Dict[str, str]:
+def template_context(
+    events: List[Dict[str, Any]], rule: Dict[str, Any]
+) -> Dict[str, str]:
     entities = summarize_entities(events)
     context = {
         "count": str(len(events)),
         "window_minutes": str(rule.get("window_minutes", 0)),
-        "source.ip": normalize_value(entities["source_ips"][0] if entities["source_ips"] else None),
-        "destination.ip": normalize_value(entities["destination_ips"][0] if entities["destination_ips"] else None),
-        "host.name": normalize_value(entities["hosts"][0] if entities["hosts"] else None),
-        "user.name": normalize_value(entities["users"][0] if entities["users"] else None),
-        "container.name": normalize_value(entities["containers"][0] if entities["containers"] else None),
-        "kubernetes.namespace": normalize_value(entities["namespaces"][0] if entities["namespaces"] else None),
-        "file.path": normalize_value(entities["files"][0] if entities["files"] else None),
+        "source.ip": normalize_value(
+            entities["source_ips"][0] if entities["source_ips"] else None
+        ),
+        "destination.ip": normalize_value(
+            entities["destination_ips"][0] if entities["destination_ips"] else None
+        ),
+        "host.name": normalize_value(
+            entities["hosts"][0] if entities["hosts"] else None
+        ),
+        "user.name": normalize_value(
+            entities["users"][0] if entities["users"] else None
+        ),
+        "container.name": normalize_value(
+            entities["containers"][0] if entities["containers"] else None
+        ),
+        "kubernetes.namespace": normalize_value(
+            entities["namespaces"][0] if entities["namespaces"] else None
+        ),
+        "file.path": normalize_value(
+            entities["files"][0] if entities["files"] else None
+        ),
         "distinct_count": "0",
     }
     distinct_field = rule.get("distinct_field")
@@ -674,7 +786,9 @@ def build_evidence(events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return evidence
 
 
-def build_alert(rule: Dict[str, Any], matched_events: List[Dict[str, Any]]) -> Dict[str, Any]:
+def build_alert(
+    rule: Dict[str, Any], matched_events: List[Dict[str, Any]]
+) -> Dict[str, Any]:
     matched_events = sorted(matched_events, key=lambda item: item["timestamp"])
     context = template_context(matched_events, rule)
     entities = summarize_entities(matched_events)
@@ -696,7 +810,9 @@ def build_alert(rule: Dict[str, Any], matched_events: List[Dict[str, Any]]) -> D
     alert_id = f"ALERT-{dedup_key[:12].upper()}"
     telemetry_sources = entities["telemetry_sources"]
     evidence = build_evidence(matched_events)
-    summary = render_template(rule.get("summary_template", rule["description"]), context)
+    summary = render_template(
+        rule.get("summary_template", rule["description"]), context
+    )
     priority_score = min(
         100,
         int(rule.get("confidence", 75))
@@ -718,7 +834,10 @@ def build_alert(rule: Dict[str, Any], matched_events: List[Dict[str, Any]]) -> D
             f"Distinct-entity condition met on {rule.get('distinct_field', 'entity')}."
         )
     if rule.get("type") == "sequence":
-        step_names = [step.get("label", f"step {idx + 1}") for idx, step in enumerate(rule.get("steps", []))]
+        step_names = [
+            step.get("label", f"step {idx + 1}")
+            for idx, step in enumerate(rule.get("steps", []))
+        ]
         why_this_fired.append(
             f"Ordered sequence observed within {rule.get('window_minutes', 0)} minutes: {' -> '.join(step_names)}."
         )
@@ -747,7 +866,9 @@ def build_alert(rule: Dict[str, Any], matched_events: List[Dict[str, Any]]) -> D
         "entities": entities,
         "scope_summary": build_scope_summary(entities),
         "coverage_summary": ", ".join(telemetry_sources) if telemetry_sources else "-",
-        "recommended_action": rule.get("recommendations", ["Investigate the correlated evidence."])[0],
+        "recommended_action": rule.get(
+            "recommendations", ["Investigate the correlated evidence."]
+        )[0],
         "why_this_fired": " ".join(why_this_fired),
         "evidence_preview": " | ".join(item["message"][:120] for item in evidence[:3]),
         "mitre": sorted(
@@ -787,7 +908,9 @@ def build_scope_summary(entities: Dict[str, List[str]]) -> str:
     return ", ".join(parts) if parts else "broad telemetry scope"
 
 
-def evaluate_rule(rule: Dict[str, Any], events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def evaluate_rule(
+    rule: Dict[str, Any], events: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
     if rule.get("type") == "sequence":
         steps = rule.get("steps", [])
         candidates = [
@@ -800,7 +923,8 @@ def evaluate_rule(rule: Dict[str, Any], events: List[Dict[str, Any]]) -> List[Di
         candidates = [
             event
             for event in events
-            if rule_source_matches(rule.get("source"), event) and event_matches(event, rule.get("match", {}))
+            if rule_source_matches(rule.get("source"), event)
+            and event_matches(event, rule.get("match", {}))
         ]
     if not candidates:
         return []
@@ -810,7 +934,9 @@ def evaluate_rule(rule: Dict[str, Any], events: List[Dict[str, Any]]) -> List[Di
     if group_fields:
         for event in candidates:
             signature = group_signature(event, group_fields)
-            if rule.get("type") == "sequence" and any(value in (None, "") for value in signature):
+            if rule.get("type") == "sequence" and any(
+                value in (None, "") for value in signature
+            ):
                 continue
             grouped[signature].append(event)
     else:
@@ -844,7 +970,9 @@ def rule_source_matches(rule_source: Optional[str], event: Dict[str, Any]) -> bo
     return telemetry == rule_source
 
 
-def detect(events: List[Dict[str, Any]], rules: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def detect(
+    events: List[Dict[str, Any]], rules: List[Dict[str, Any]]
+) -> List[Dict[str, Any]]:
     alerts = []
     for rule in rules:
         alerts.extend(evaluate_rule(rule, events))
@@ -859,7 +987,9 @@ def detect(events: List[Dict[str, Any]], rules: List[Dict[str, Any]]) -> List[Di
     return alerts
 
 
-def build_summary(alerts: List[Dict[str, Any]], events: List[Dict[str, Any]]) -> Dict[str, Any]:
+def build_summary(
+    alerts: List[Dict[str, Any]], events: List[Dict[str, Any]]
+) -> Dict[str, Any]:
     by_severity = defaultdict(int)
     by_rule = defaultdict(int)
     by_source = defaultdict(int)
@@ -873,8 +1003,12 @@ def build_summary(alerts: List[Dict[str, Any]], events: List[Dict[str, Any]]) ->
         "total_alerts": len(alerts),
         "critical_alerts": by_severity.get("critical", 0),
         "high_alerts": by_severity.get("high", 0),
-        "correlated_alerts": sum(1 for alert in alerts if alert.get("source_count", 0) > 1),
-        "external_ip_alerts": sum(1 for alert in alerts if alert.get("entities", {}).get("source_ips")),
+        "correlated_alerts": sum(
+            1 for alert in alerts if alert.get("source_count", 0) > 1
+        ),
+        "external_ip_alerts": sum(
+            1 for alert in alerts if alert.get("entities", {}).get("source_ips")
+        ),
         "normalized_event_count": len(events),
         "by_severity": dict(by_severity),
         "by_rule": dict(by_rule),
@@ -882,7 +1016,9 @@ def build_summary(alerts: List[Dict[str, Any]], events: List[Dict[str, Any]]) ->
     }
 
 
-def apply_asset_risk_to_alerts(alerts: List[Dict[str, Any]], asset_store: AssetInventoryStore) -> List[Dict[str, Any]]:
+def apply_asset_risk_to_alerts(
+    alerts: List[Dict[str, Any]], asset_store: AssetInventoryStore
+) -> List[Dict[str, Any]]:
     for alert in alerts:
         hosts = (alert.get("entities") or {}).get("hosts", [])
         if not hosts:
@@ -910,8 +1046,14 @@ def apply_asset_risk_to_alerts(alerts: List[Dict[str, Any]], asset_store: AssetI
             reasons.append(f"{vuln_summary.get('high', 0)} high CVE(s) on host")
 
         if priority_boost:
-            alert["priority_score"] = min(100, int(alert.get("priority_score", 0)) + priority_boost)
-            alert["why_this_fired"] = f"{alert.get('why_this_fired', '').rstrip()} Asset risk boosted priority because " + ", ".join(reasons) + "."
+            alert["priority_score"] = min(
+                100, int(alert.get("priority_score", 0)) + priority_boost
+            )
+            alert["why_this_fired"] = (
+                f"{alert.get('why_this_fired', '').rstrip()} Asset risk boosted priority because "
+                + ", ".join(reasons)
+                + "."
+            )
             alert["asset_priority_context"] = {
                 "host_name": asset.get("host_name"),
                 "business_criticality": asset.get("business_criticality"),
@@ -927,6 +1069,20 @@ def main() -> None:
     events = load_all_normalized_events()
     detected_alerts = detect(events, rules)
     detected_alerts = apply_asset_risk_to_alerts(detected_alerts, AssetInventoryStore())
+
+    risk_engine = RiskEngine()
+    for alert in detected_alerts:
+        hosts = (alert.get("entities") or {}).get("hosts", [])
+        for host in hosts:
+            risk_engine.calculate_host_risk_from_alert(
+                host_name=host,
+                alert_severity=alert.get("severity", "medium"),
+                alert_rule_id=alert.get("rule_id", "unknown"),
+                alert_id=alert.get("alert_id", ""),
+            )
+
+    risk_engine.recalculate_all_host_risks()
+
     store = AlertStateStore()
     alerts = store.sync_alerts(detected_alerts)
     payload = {
