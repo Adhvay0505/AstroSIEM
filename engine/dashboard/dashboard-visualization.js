@@ -1815,6 +1815,116 @@ async function loadAssets() {
   }
 }
 
+let arDT = null;
+let offendersDT = null;
+
+async function loadActiveResponses() {
+  try {
+    const payload = await apiJson('/api/active-responses');
+    const summary = payload.summary || {};
+    const active = payload.active || [];
+    const offenders = payload.offenders || [];
+    
+    const statsContainer = document.getElementById('arStats');
+    if (statsContainer) {
+      statsContainer.innerHTML = `
+        <div class="coverage-card">
+          <div class="value">${summary.active_responses || 0}</div>
+          <div class="label">Active Responses</div>
+        </div>
+        <div class="coverage-card">
+          <div class="value">${summary.repeated_offenders || 0}</div>
+          <div class="label">Repeated Offenders</div>
+        </div>
+        <div class="coverage-card">
+          <div class="value">${summary.high_offenders || 0}</div>
+          <div class="label">High Offenders (3+)</div>
+        </div>
+        <div class="coverage-card">
+          <div class="value">${summary.total_history || 0}</div>
+          <div class="label">Total History</div>
+        </div>
+      `;
+    }
+    
+    const arCountEl = document.getElementById('arCount');
+    if (arCountEl) {
+      arCountEl.textContent = `Showing ${active.length} active response(s)`;
+    }
+    
+    if (!arDT) {
+      arDT = $('#active-responses-table').DataTable({
+        destroy: true,
+        pageLength: 10,
+        order: [[4, 'desc']]
+      });
+    }
+    
+    const arRows = active.map(resp => [
+      safeText(resp.entity_type || '-'),
+      `<span class="severity-high">${safeText(resp.entity_value || '-')}</span>`,
+      safeText(resp.action_name || '-'),
+      `<span class="status-pill-inline severity-high">${safeText(resp.status || '-')}</span>`,
+      resp.started_at ? new Date(resp.started_at).toLocaleString() : '-',
+      resp.expires_at ? new Date(resp.expires_at).toLocaleString() : '-',
+      safeText(resp.triggered_by_alert_id || resp.triggered_by_finding_id || '-'),
+      `<button class="btn btn-sm btn-danger ar-revert-btn" data-response-id="${safeText(resp.response_id)}">Revert</button>`
+    ]);
+    
+    arDT.clear();
+    arDT.rows.add(arRows);
+    arDT.draw();
+    
+    if (!offendersDT) {
+      offendersDT = $('#offenders-table').DataTable({
+        destroy: true,
+        pageLength: 10,
+        order: [[2, 'desc']]
+      });
+    }
+    
+    const offenderRows = offenders.map(off => [
+      safeText(off.entity_type || '-'),
+      safeText(off.entity_value || '-'),
+      `<span class="severity-${off.offense_count >= 3 ? 'critical' : off.offense_count >= 2 ? 'high' : 'medium'}">${off.offense_count || 1}</span>`,
+      off.first_offense_at ? new Date(off.first_offense_at).toLocaleString() : '-',
+      off.last_offense_at ? new Date(off.last_offense_at).toLocaleString() : '-'
+    ]);
+    
+    offendersDT.clear();
+    offendersDT.rows.add(offenderRows);
+    offendersDT.draw();
+    
+    document.querySelectorAll('.ar-revert-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const responseId = e.target.dataset.responseId;
+        if (confirm('Revert this active response?')) {
+          try {
+            await apiJson('/api/active-responses/revert', 'POST', {response_id: responseId});
+            loadActiveResponses();
+          } catch (err) {
+            alert('Failed to revert: ' + err.message);
+          }
+        }
+      });
+    });
+    
+  } catch (err) {
+    console.error('Failed to load active responses:', err);
+    const arCountEl = document.getElementById('arCount');
+    if (arCountEl) {
+      arCountEl.textContent = 'Failed to load active responses';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const refreshArBtn = document.getElementById('refreshArBtn');
+  if (refreshArBtn) {
+    refreshArBtn.addEventListener('click', loadActiveResponses);
+  }
+});
+
 function renderCasesTable(data) {
   if (!casesDT) {
     casesDT = $('#cases-table').DataTable({

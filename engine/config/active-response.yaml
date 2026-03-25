@@ -3,3 +3,32 @@ responses:
     type: log
     min_severity: critical
     output_file: processed-data/active-response.log
+
+stateful_responses:
+  - name: block-ip-temp
+    type: iptables-block
+    min_severity: high
+    duration_seconds: 3600
+    repeated_offender: true
+    entity_type: ip
+    multiplier_per_offense: 2.0
+    max_duration: 86400
+
+  - name: block-malicious-ip
+    type: ip-block
+    min_severity: critical
+    duration_seconds: 7200
+    repeated_offender: true
+    entity_type: ip
+
+  - name: disable-compromised-user
+    type: user-disable
+    min_severity: critical
+    entity_type: user
+    requires_approval: false
+
+  - name: kill-suspicious-process
+    type: process-kill
+    min_severity: high
+    entity_type: host
+    process_pattern: ""  # Set via alert data

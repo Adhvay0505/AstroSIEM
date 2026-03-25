@@ -1611,7 +1611,7 @@
     <div class="header-search">
       <div class="header-search-shell">
         <span class="header-search-icon">Jump</span>
-        <input type="text" id="navSearchInput" placeholder="Jump to alerts, investigate, coverage, posture, assets, geoip, fim, compliance, network, additional, or vuln">
+        <input type="text" id="navSearchInput" placeholder="Jump to alerts, investigate, coverage, posture, assets, geoip, fim, compliance, network, vuln, active">
         <span class="header-search-hint">/</span>
       </div>
       <div class="nav-search-results" id="navSearchResults"></div>
@@ -2305,6 +2305,45 @@
         </div>
       </div>
 
+      <div id="activeResponseTab" class="tab">
+        <div class="coverage-grid" id="arStats"></div>
+        <div class="actions-bar">
+          <span id="arCount">Loading active responses...</span>
+          <div class="action-group">
+            <button class="btn btn-secondary" id="refreshArBtn">Refresh</button>
+          </div>
+        </div>
+        <h3>Active Responses</h3>
+        <table id="active-responses-table" class="table-full">
+          <thead>
+            <tr>
+              <th>Entity Type</th>
+              <th>Entity Value</th>
+              <th>Action</th>
+              <th>Status</th>
+              <th>Started</th>
+              <th>Expires</th>
+              <th>Triggered By</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <h3 style="margin-top: 30px;">Repeated Offenders</h3>
+        <table id="offenders-table" class="table-full">
+          <thead>
+            <tr>
+              <th>Entity Type</th>
+              <th>Entity Value</th>
+              <th>Offense Count</th>
+              <th>First Offense</th>
+              <th>Last Offense</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
       <div id="additionalTab" class="tab">
         <div class="additional-sources-header">
           <h2>Additional Sources</h2>
@@ -2460,6 +2499,11 @@
 
       if (typeof window.adjustVisibleDataTables === 'function') {
         setTimeout(() => window.adjustVisibleDataTables(), 50);
+      }
+      
+      // Load active responses when tab is shown
+      if (id === 'activeResponseTab' && typeof loadActiveResponses === 'function') {
+        loadActiveResponses();
       }
       
       // Initialize GeoIP map when tab is first shown

@@ -31,7 +31,9 @@ from storage.alert_state import AlertStateStore
 from storage.asset_inventory import AssetInventoryStore
 from storage.posture_state import PostureStateStore
 from storage.risk_scores import RiskScoreStore
+from storage.active_response_state import ActiveResponseStore
 from detection.risk_engine import RiskEngine
+from posture.active_response import execute_stateful_responses
 
 
 def utc_now() -> datetime:
@@ -545,6 +547,20 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
             summary = engine.get_host_risk_summary(host_name)
             self._send_json({"host_risk": summary})
             return
+        if parsed.path == "/api/active-responses":
+            ar_store = ActiveResponseStore()
+            active = ar_store.get_active_responses()
+            history = ar_store.get_response_history(limit=50)
+            offenders = ar_store.get_offenders()
+            self._send_json(
+                {
+                    "active": active,
+                    "history": history,
+                    "offenders": offenders,
+                    "summary": ar_store.summarize(),
+                }
+            )
+            return
         super().do_GET()
 
     def do_PATCH(self):
@@ -729,6 +745,43 @@ class AstroRequestHandler(SimpleHTTPRequestHandler):
             engine = RiskEngine()
             summary = engine.get_host_risk_summary(host_name)
             self._send_json({"host_risk": summary})
+            return
+        if parsed.path == "/api/active-responses/trigger":
+            body = self._read_json_body()
+            findings = body.get("findings", [])
+            alerts = body.get("alerts", [])
+            executed = execute_stateful_responses(findings, alerts)
+            self._send_json({"executed": executed, "count": len(executed)})
+            return
+        if parsed.path == "/api/active-responses/revert":
+            body = self._read_json_body()
+            response_id = body.get("response_id", "")
+            ar_store = ActiveResponseStore()
+            active = ar_store.get_active_responses()
+            reverted = []
+            for resp in active:
+                if response_id and resp.get("response_id") != response_id:
+                    continue
+                from posture.active_response import revert_stateful_action
+
+                status, msg = revert_stateful_action(
+                    resp.get("action_type", ""),
+                    resp.get("entity_value", ""),
+                    resp.get("action_name", ""),
+                )
+                ar_store.end_response(
+                    resp["response_id"],
+                    status=status,
+                    error_message=msg if status != "success" else "",
+                )
+                reverted.append(
+                    {
+                        "response_id": resp["response_id"],
+                        "status": status,
+                        "message": msg,
+                    }
+                )
+            self._send_json({"reverted": reverted, "count": len(reverted)})
             return
         self._send_json({"error": "not_found"}, status=HTTPStatus.NOT_FOUND)
 
