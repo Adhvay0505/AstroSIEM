@@ -19,6 +19,10 @@ echo "[*] Importing asset inventory and vulnerability results..."
 python3 "$SCRIPT_DIR/parsers/import-asset-inventory.py"
 
 echo ""
+echo "[*] Refreshing vulnerability intelligence..."
+python3 "$SCRIPT_DIR/vulnerability/vuln_intel.py"
+
+echo ""
 echo "[*] Parsing security/auth logs..."
 python3 "$SCRIPT_DIR/parsers/parse-syslog-security.py"
 

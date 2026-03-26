@@ -16,6 +16,8 @@ IPS_JSON="[]"
 PACKAGES_JSON="[]"
 SERVICES_JSON="[]"
 CONFIG_CHECKS_JSON="[]"
+INVENTORY_DIGEST=""
+PACKAGE_COUNT=0
 
 if [ -f /etc/os-release ]; then
   . /etc/os-release
@@ -157,6 +159,23 @@ PY
 )"
 fi
 
+if command -v python3 >/dev/null 2>&1; then
+  INVENTORY_META="$(python3 - "$PACKAGES_JSON" <<'PY'
+import hashlib, json, sys
+
+try:
+    packages = json.loads(sys.argv[1])
+except Exception:
+    packages = []
+
+digest = hashlib.sha256(json.dumps(packages, sort_keys=True).encode()).hexdigest() if packages else ""
+print(json.dumps({"inventory_digest": digest, "package_count": len(packages)}))
+PY
+)"
+  INVENTORY_DIGEST="$(printf '%s' "$INVENTORY_META" | python3 -c 'import sys, json; print(json.load(sys.stdin).get("inventory_digest",""))')"
+  PACKAGE_COUNT="$(printf '%s' "$INVENTORY_META" | python3 -c 'import sys, json; print(json.load(sys.stdin).get("package_count",0))')"
+fi
+
 cat > "$OUTPUT_FILE" <<EOF
 {
   "hostname": "$HOSTNAME_VALUE",
@@ -171,6 +190,8 @@ cat > "$OUTPUT_FILE" <<EOF
   "owner": "",
   "internet_facing": false,
   "generated_at": "$(date -Iseconds)",
+  "inventory_digest": "$INVENTORY_DIGEST",
+  "package_count": $PACKAGE_COUNT,
   "packages": $PACKAGES_JSON,
   "services": $SERVICES_JSON,
   "config_checks": $CONFIG_CHECKS_JSON

@@ -67,6 +67,9 @@ echo "[$(date -Iseconds)] INFO: Starting vulnerability scan with $scanner" >> "$
 if "$scanner" >> "$LOG_FILE" 2>&1; then
   write_status "success" "Vulnerability scan completed successfully" "$scanner"
   echo "[$(date -Iseconds)] INFO: Vulnerability scan completed successfully" >> "$LOG_FILE"
+  if [ -x "/opt/astro-siem/agent/agent-http-server.sh" ]; then
+    /opt/astro-siem/agent/agent-http-server.sh >> "$LOG_FILE" 2>&1 || true
+  fi
 else
   write_status "error" "Vulnerability scan failed" "$scanner"
   echo "[$(date -Iseconds)] ERROR: Vulnerability scan failed" >> "$LOG_FILE"

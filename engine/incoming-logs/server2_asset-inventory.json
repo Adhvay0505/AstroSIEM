@@ -1,0 +1,28 @@
+{
+  "hostname": "server2",
+  "os_name": "Ubuntu",
+  "os_version": "20.04",
+  "kernel_version": "5.15.0-91-generic",
+  "architecture": "x86_64",
+  "primary_ip": "192.168.1.11",
+  "ips": ["192.168.1.11"],
+  "environment": "production",
+  "business_criticality": "critical",
+  "owner": "app-team",
+  "internet_facing": true,
+  "generated_at": "2026-03-25T10:00:00Z",
+  "packages": [
+    {"name": "python3", "version": "3.10.6", "manager": "apt"},
+    {"name": "linux-image", "version": "5.15.0-91", "manager": "apt"},
+    {"name": "apache2", "version": "2.4.52", "manager": "apt"},
+    {"name": "openssh", "version": "1:8.2p1-4ubuntu0.5", "manager": "apt"}
+  ],
+  "services": [
+    {"name": "sshd.service", "enabled_state": "enabled", "active_state": "active"},
+    {"name": "apache2.service", "enabled_state": "enabled", "active_state": "active"}
+  ],
+  "config_checks": [
+    {"key": "ssh_permit_root_login", "value": "yes", "source": "/etc/ssh/sshd_config"},
+    {"key": "firewall_status", "value": "inactive", "source": "ufw"}
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "hostname": "server1",
+  "generated_at": "2026-03-25T10:00:00Z",
+  "vulnerabilities": [
+    {
+      "cve_id": "CVE-2024-21762",
+      "severity": "critical",
+      "score": 9.8,
+      "package_name": "openssl",
+      "package_version": "1.1.1f-1ubuntu2",
+      "title": "OpenSSL Use After Free Vulnerability",
+      "summary": "A use after free vulnerability in OpenSSL allows remote attackers to cause denial of service",
+      "fix_version": "1.1.1w",
+      "published_at": "2024-02-06"
+    },
+    {
+      "cve_id": "CVE-2024-1709",
+      "severity": "critical",
+      "score": 10.0,
+      "package_name": "libopensbi",
+      "package_version": "0.9-2",
+      "title": "libopensbi privilege escalation",
+      "summary": "libopensbi has a buffer overflow allowing privilege escalation",
+      "fix_version": "1.0",
+      "published_at": "2024-02-19"
+    },
+    {
+      "cve_id": "CVE-2023-44487",
+      "severity": "high",
+      "score": 7.5,
+      "package_name": "nginx",
+      "package_version": "1.18.0",
+      "title": "HTTP/2 Rapid Reset Attack",
+      "summary": "The HTTP/2 protocol allows a denial of service",
+      "fix_version": "1.18.0ubuntu1",
+      "published_at": "2023-10-10"
+    }
+  ],
+  "metadata": {
+    "scanner": "agent_scan",
+    "feed": {
+      "source": "nvd_api",
+      "version": "2.0"
+    }
+  }
+}

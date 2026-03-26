@@ -1,0 +1,35 @@
+{
+  "hostname": "server2",
+  "generated_at": "2026-03-25T10:00:00Z",
+  "vulnerabilities": [
+    {
+      "cve_id": "CVE-2024-3400",
+      "severity": "critical",
+      "score": 10.0,
+      "package_name": "python3",
+      "package_version": "3.10.6",
+      "title": "Python arbitrary code execution",
+      "summary": "Python allows arbitrary code execution through malicious input",
+      "fix_version": "3.11.0",
+      "published_at": "2024-04-01"
+    },
+    {
+      "cve_id": "CVE-2024-1086",
+      "severity": "high",
+      "score": 7.8,
+      "package_name": "linux-image",
+      "package_version": "5.15.0-91",
+      "title": "Linux kernel privilege escalation",
+      "summary": "Linux kernel has a local privilege escalation vulnerability",
+      "fix_version": "5.15.0-100",
+      "published_at": "2024-01-31"
+    }
+  ],
+  "metadata": {
+    "scanner": "agent_scan",
+    "feed": {
+      "source": "nvd_api",
+      "version": "2.0"
+    }
+  }
+}

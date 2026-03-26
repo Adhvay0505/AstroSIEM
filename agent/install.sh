@@ -220,7 +220,23 @@ StandardOutput=journal
 StandardError=journal
 EOF
 
+    cat > /etc/systemd/system/astro-siem-vuln-scan.timer << 'EOF'
+[Unit]
+Description=AstroSIEM Vulnerability Scan Refresh
+Requires=astro-siem-vuln-scan.service
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=6h
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
+EOF
+
     systemctl daemon-reload
+    systemctl enable astro-siem-vuln-scan.timer
     
     print_success "Systemd service and timer installed"
 }
@@ -255,6 +271,12 @@ install_agent_files() {
         cp "$SCRIPT_DIR/run-vuln-scan.sh" "$AGENT_INSTALL_DIR/"
         chmod +x "$AGENT_INSTALL_DIR/run-vuln-scan.sh"
         print_success "Vulnerability scan runner installed"
+    fi
+
+    if [ -f "$SCRIPT_DIR/vuln-scanner.sh" ]; then
+        cp "$SCRIPT_DIR/vuln-scanner.sh" "$AGENT_INSTALL_DIR/"
+        chmod +x "$AGENT_INSTALL_DIR/vuln-scanner.sh"
+        print_success "Vulnerability scanner installed"
     fi
 
     # Copy asset inventory exporter
@@ -318,6 +340,7 @@ main() {
     
     # Start timer
     systemctl start astro-siem-agent.timer
+    systemctl start astro-siem-vuln-scan.timer
     
     # Get IP for display
     local ip
@@ -335,6 +358,7 @@ main() {
     echo "Vuln Trigger URL: http://$ip/vuln-scan/trigger"
     echo ""
     echo "The agent will automatically export logs every 24 hours."
+    echo "Vulnerability scans refresh every 6 hours."
     echo "To manually trigger an export: sudo systemctl start astro-siem-agent"
     echo ""
     echo "Installation directory: $AGENT_INSTALL_DIR"
